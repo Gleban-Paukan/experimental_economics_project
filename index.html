@@ -555,62 +555,7 @@
             </div>
         </div>
 
-        <!-- Экран инструкций -->
-        <div id="instructions-screen" class="screen">
-            <div class="card">
-                <h2>📋 Правила игры</h2>
-                
-                <div class="highlight">
-                    <h3>Начальные условия:</h3>
-                    <ul style="margin-left: 20px; margin-bottom: 16px;">
-                        <li>У каждого участника есть <strong>100 монет</strong></li>
-                        <li>Группа из <strong>4 участников</strong> может создать общественное благо</li>
-                        <li>Это благо будет поровну разделено между всеми (<strong>по 50 монет каждому</strong>)</li>
-                    </ul>
-                </div>
 
-                <div class="highlight">
-                    <h3>🎲 Неопределенность:</h3>
-                    <ul style="margin-left: 20px; margin-bottom: 16px;">
-                        <li>Реальная стоимость создания блага <strong>неизвестна заранее</strong></li>
-                        <li>Она может быть: <strong>60, 80, 100, 120 или 140 монет</strong></li>
-                        <li>Стоимость определяется <strong>случайно в каждом раунде</strong></li>
-                    </ul>
-                </div>
-
-                <div class="highlight">
-                    <h3>⚙️ Механизм:</h3>
-                    <ul style="margin-left: 20px; margin-bottom: 16px;">
-                        <li>Каждый участник делает взнос (от 0 до 100)</li>
-                        <li>Если <strong>сумма всех взносов ≥ реальная стоимость</strong> → проект <span class="status status--success">СОЗДАН</span></li>
-                        <li>Если <strong>сумма &lt; стоимость</strong> → проект <span class="status status--error">ПРОВАЛЕН</span>, взносы потеряны</li>
-                    </ul>
-                </div>
-
-                <div class="highlight">
-                    <h3>💰 Расчет выигрыша:</h3>
-                    <ul style="margin-left: 20px; margin-bottom: 16px;">
-                        <li><strong>Проект создан:</strong> выигрыш = 50 - ваш взнос</li>
-                        <li><strong>Проект провален:</strong> выигрыш = -ваш взнос</li>
-                    </ul>
-                </div>
-
-                <p class="text-center"><strong>🎯 ЦЕЛЬ: Максимизировать свой общий выигрыш за 5 раундов</strong></p>
-            </div>
-
-            <div class="card">
-                <h3>❓ Контрольные вопросы</h3>
-                <p>Ответьте на все вопросы правильно, чтобы продолжить:</p>
-                
-                <div id="quiz-questions"></div>
-                
-                <div id="quiz-error" class="error-message" style="display: none;"></div>
-                
-                <div class="text-center">
-                    <button class="btn btn--primary" onclick="checkQuiz()">Я понял правила, начать эксперимент</button>
-                </div>
-            </div>
-        </div>
 
         <!-- Экран раунда -->
         <div id="round-screen" class="screen">
@@ -775,19 +720,16 @@
     </div>
 
     <script>
-        // ═══════════════════════════════════════════════════════════════
-        // ВАЖНО! ВСТАВЬ СЮДА СВОЮ КОНФИГУРАЦИЮ ИЗ FIREBASE CONSOLE
-        // ═══════════════════════════════════════════════════════════════
-          const firebaseConfig = {
-            apiKey: "AIzaSyBdqtRnPhfqgYJYSMR5TZucmVHTuE4WTY8",
-            authDomain: "cost-sharing-game.firebaseapp.com",
-            databaseURL: "https://cost-sharing-game-default-rtdb.firebaseio.com",
-            projectId: "cost-sharing-game",
-            storageBucket: "cost-sharing-game.firebasestorage.app",
-            messagingSenderId: "882128282715",
-            appId: "1:882128282715:web:2fc86b8c68cbf3ccc44b7e"
-          };
-        // ═══════════════════════════════════════════════════════════════
+        // Firebase Configuration (настроено и готово к работе)
+        const firebaseConfig = {
+          apiKey: "AIzaSyBdqtRnPhfqgYJYSMR5TZucmVHTuE4WTY8",
+          authDomain: "cost-sharing-game.firebaseapp.com",
+          databaseURL: "https://cost-sharing-game-default-rtdb.firebaseio.com",
+          projectId: "cost-sharing-game",
+          storageBucket: "cost-sharing-game.firebasestorage.app",
+          messagingSenderId: "882128282715",
+          appId: "1:882128282715:web:2fc86b8c68cbf3ccc44b7e"
+        };
 
         // Инициализация Firebase
         let app, database;
@@ -830,8 +772,8 @@
 
         // Проверка соединения с Firebase
         function checkFirebaseConnection() {
-            if (!database || firebaseConfig.apiKey === "YOUR_API_KEY_HERE") {
-                showError('🔥 Firebase не настроен!\n\nПожалуйста, замените все placeholderы (YOUR_*) в firebaseConfig на реальные данные из Firebase Console.');
+            if (!database) {
+                showError('🔥 Ошибка подключения к Firebase! Проверьте соединение с интернетом.');
                 return false;
             }
             return true;
@@ -1060,7 +1002,7 @@
                 console.log('DEBUG: Переход в лобби');
                 showLobby();
             } else if (roomData.status === 'playing') {
-                if (gameState.currentScreen === 'lobby-screen') {
+                if (gameState.currentScreen === 'lobby-screen' || gameState.currentScreen === 'results-screen') {
                     console.log('DEBUG: Старт игрового раунда');
                     startGameRound(roomData);
                 } else if (gameState.currentScreen === 'waiting-screen') {
@@ -1083,7 +1025,7 @@
                 }
             } else if (roomData.status === 'results') {
                 console.log('DEBUG: Статус results - показываем результаты');
-                if (gameState.currentScreen !== 'results-screen') {
+                if (gameState.currentScreen !== 'results-screen' && gameState.currentScreen !== 'final-screen') {
                     showRoundResults(roomData);
                 }
             } else if (roomData.status === 'finished') {
@@ -1207,13 +1149,17 @@
         function startGameForAllPlayers() {
             if (!gameState.isHost) return;
             
+            console.log('DEBUG: ⭐ Хост запускает игру! Раунд 1');
+            
             // Генерируем случайные издержки
             const actualCost = gameState.possibleCosts[Math.floor(Math.random() * gameState.possibleCosts.length)];
+            console.log('DEBUG: Издержки для раунда 1 =', actualCost);
             
             const updates = {
                 status: 'playing',
                 actualCost: actualCost,
-                roundStartTime: Date.now()
+                roundStartTime: Date.now(),
+                roundCalculated: false
             };
             
             // Сбрасываем ready у всех игроков
@@ -1225,12 +1171,14 @@
                     updates[`players/${playerId}/contribution`] = 0;
                 });
                 
+                console.log('DEBUG: Применяем начальные обновления для старта игры');
                 database.ref(`rooms/${gameState.roomCode}`).update(updates);
             });
         }
         
         // Начало раунда для игрока
         function startGameRound(roomData) {
+            console.log('DEBUG: startGameRound - раунд', gameState.currentRound);
             showScreen('round-screen');
             updateRoundDisplay();
             renderExpectationOptions();
@@ -1238,6 +1186,14 @@
             updatePlayersStatus(roomData.players);
             updateScoresDisplay(roomData.players);
             document.getElementById('contribution-section').style.display = 'none';
+            
+            // Сбрасываем локальные UI элементы
+            document.querySelectorAll('#expectation-options .radio-option').forEach(option => {
+                option.classList.remove('selected');
+                option.querySelector('input').checked = false;
+            });
+            document.getElementById('contribution-slider').value = 25;
+            document.getElementById('contribution-value').textContent = '25 монет';
         }
 
         // Обновление отображения раунда
@@ -1349,45 +1305,59 @@
             const expectation = parseInt(expectationInput.value);
             const contribution = parseInt(contributionSlider.value);
             
-            console.log('DEBUG: Отправка решений -', { expectation, contribution });
+            console.log('DEBUG: Отправка решений для раунда', gameState.currentRound, '-', { expectation, contribution });
             
-            // Отправляем решения в Firebase
-            const playerUpdates = {
-                belief: expectation,
-                contribution: contribution,
-                ready: true,
-                timestamp: Date.now()
-            };
-            
-            database.ref(`rooms/${gameState.roomCode}/players/${gameState.playerId}`).update(playerUpdates)
-                .then(() => {
-                    console.log('DEBUG: Решения отправлены успешно');
+            // Проверяем, что мы не отправляли уже решения
+            database.ref(`rooms/${gameState.roomCode}/players/${gameState.playerId}/ready`).once('value').then(readySnap => {
+                if (readySnap.val() === true) {
+                    console.log('DEBUG: Решения уже отправлены, переходим к ожиданию');
                     showScreen('waiting-screen');
-                    // ВСЕ игроки проверяют готовность
-                    checkIfAllReady();
-                })
-                .catch(error => {
-                    console.error('ERROR: Ошибка отправки решений:', error);
-                    showError('Ошибка отправки решений');
-                });
+                    return;
+                }
+                
+                // Отправляем решения в Firebase
+                const playerUpdates = {
+                    belief: expectation,
+                    contribution: contribution,
+                    ready: true,
+                    timestamp: Date.now()
+                };
+                
+                return database.ref(`rooms/${gameState.roomCode}/players/${gameState.playerId}`).update(playerUpdates);
+            }).then(() => {
+                console.log('DEBUG: Решения отправлены успешно');
+                showScreen('waiting-screen');
+                // ВСЕ игроки проверяют готовность
+                setTimeout(() => checkIfAllReady(), 500);
+            }).catch(error => {
+                console.error('ERROR: Ошибка отправки решений:', error);
+                showError('Ошибка отправки решений. Попробуйте еще раз.');
+            });
         }
         
         // ВСЕ игроки проверяют, все ли готовы (КРИТИЧЕСКАЯ ФУНКЦИЯ)
         function checkIfAllReady() {
-            database.ref(`rooms/${gameState.roomCode}/players`).once('value', (snapshot) => {
-                const players = snapshot.val();
-                if (!players) return;
+            database.ref(`rooms/${gameState.roomCode}`).once('value', (snapshot) => {
+                const roomData = snapshot.val();
+                if (!roomData || !roomData.players) {
+                    console.error('ERROR: checkIfAllReady - нет данных комнаты');
+                    return;
+                }
                 
+                const players = roomData.players;
                 const playersArray = Object.values(players);
                 const playerCount = playersArray.length;
                 const readyCount = playersArray.filter(p => p.ready).length;
                 
-                console.log(`DEBUG: checkIfAllReady - ${readyCount}/${playerCount} игроков готовы`);
+                console.log(`DEBUG: checkIfAllReady - ${readyCount}/${playerCount} игроков готовы, раунд ${roomData.currentRound}, roundCalculated=${roomData.roundCalculated}`);
                 
-                if (readyCount === playerCount && playerCount > 0) {
+                // Проверяем, что результаты еще не рассчитаны
+                if (readyCount === playerCount && playerCount > 0 && !roomData.roundCalculated) {
                     console.log('DEBUG: ВСЕ ГОТОВЫ! Начинаем расчет результатов...');
                     // Пытаемся вычислить результаты (с использованием транзакции)
                     calculateRoundResultsAtomic();
+                } else if (roomData.roundCalculated) {
+                    console.log('DEBUG: Результаты уже рассчитаны, ожидаем перехода к results');
                 }
             }).catch(error => {
                 console.error('ERROR: checkIfAllReady failed:', error);
@@ -1401,6 +1371,8 @@
             const totalCount = playersArray.length;
             const waitingContainer = document.getElementById('waiting-status');
             
+            if (!waitingContainer) return; // Экран может быть не активен
+            
             console.log(`DEBUG: updateWaitingStatus - ${readyCount}/${totalCount} готовы`);
             
             waitingContainer.innerHTML = `
@@ -1412,12 +1384,6 @@
                     return `<p>${icon} ${player.name}: ${status}</p>`;
                 }).join('')}
             `;
-            
-            // ВСЕ игроки проверяют готовность
-            if (readyCount === totalCount && totalCount > 0) {
-                console.log('DEBUG: Все готовы в updateWaitingStatus, вызываем checkIfAllReady');
-                checkIfAllReady();
-            }
         }
 
         // Атомарный расчет результатов раунда (может вызвать ЛЮБОЙ игрок)
@@ -1511,21 +1477,23 @@
                             updates[`players/${player.id}/ready`] = false;
                         });
                         
-                        console.log('DEBUG: Применяем обновления к базе данных...');
+                        console.log('DEBUG: Применяем обновления к базе данных для раунда', currentRound, '...');
                         
                         // Применяем все обновления
                         roundRef.update(updates)
                             .then(() => {
-                                console.log('DEBUG: ✅ Результаты успешно сохранены!');
-                                // Сбрасываем флаг для следующего раунда
-                                setTimeout(() => {
-                                    calculatedRef.set(false);
-                                    console.log('DEBUG: Флаг roundCalculated сброшен');
-                                }, 500);
+                                console.log('DEBUG: ✅ Результаты раунда', currentRound, 'успешно сохранены!');
+                                console.log('DEBUG: Сброс roundCalculated чтобы разрешить следующий расчет');
+                                // КРИТИЧЕСКИ ВАЖНО: Сбрасываем флаг для следующего раунда
+                                return calculatedRef.set(false);
+                            })
+                            .then(() => {
+                                console.log('DEBUG: ✅ Флаг roundCalculated успешно сброшен, готовы к следующему раунду!');
                             })
                             .catch(error => {
                                 console.error('ERROR: Ошибка при сохранении результатов:', error);
-                                calculatedRef.set(false); // Сбрасываем флаг при ошибке
+                                // При ошибке тоже сбрасываем флаг
+                                calculatedRef.set(false);
                             });
                     }).catch(error => {
                         console.error('ERROR: Ошибка получения данных комнаты:', error);
@@ -1537,10 +1505,14 @@
 
         // Показ результатов раунда
         function showRoundResults(roomData) {
+            console.log('DEBUG: showRoundResults для раунда', gameState.currentRound);
             showScreen('results-screen');
             
             const currentRoundHistory = roomData.history[`round${gameState.currentRound}`];
-            if (!currentRoundHistory) return;
+            if (!currentRoundHistory) {
+                console.error('ERROR: Нет данных истории для раунда', gameState.currentRound);
+                return;
+            }
             
             document.getElementById('results-title').textContent = `Результаты раунда ${gameState.currentRound}`;
             
@@ -1596,13 +1568,17 @@
                 document.getElementById('total-payoff').textContent = myPlayer.score || 0;
             }
             
-            // Кнопка следующего раунда (ЛЮБОЙ может нажать)
+            // Кнопка следующего раунда
             const nextBtn = document.getElementById('next-round-btn');
             if (gameState.currentRound >= 5) {
                 nextBtn.textContent = 'Финальные результаты';
                 nextBtn.onclick = () => {
                     console.log('DEBUG: Переход к финальным результатам');
-                    database.ref(`rooms/${gameState.roomCode}/status`).set('finished');
+                    // Используем транзакцию чтобы только один раз установить статус
+                    database.ref(`rooms/${gameState.roomCode}/status`).transaction((current) => {
+                        if (current === 'finished') return; // Уже установлено
+                        return 'finished';
+                    });
                 };
             } else {
                 nextBtn.textContent = 'Следующий раунд';
@@ -1612,13 +1588,18 @@
 
         // Следующий раунд (ЛЮБОЙ игрок может инициировать)
         function nextRound() {
-            console.log('DEBUG: nextRound вызван, isHost =', gameState.isHost);
+            console.log('DEBUG: ========================================');
+            console.log('DEBUG: nextRound вызван, текущий раунд =', gameState.currentRound);
+            console.log('DEBUG: ========================================');
             
             const nextRoundNumber = gameState.currentRound + 1;
             
             if (nextRoundNumber > 5) {
-                console.log('DEBUG: Все раунды завершены, переход к финалу');
-                database.ref(`rooms/${gameState.roomCode}/status`).set('finished');
+                console.log('DEBUG: ✅ Все 5 раундов завершены! Переход к финалу');
+                database.ref(`rooms/${gameState.roomCode}/status`).transaction((current) => {
+                    if (current === 'finished') return; // Уже установлено
+                    return 'finished';
+                });
                 return;
             }
             
@@ -1638,10 +1619,11 @@
                 }
                 
                 if (committed && snapshot.val() === nextRoundNumber) {
-                    console.log('DEBUG: Мы инициировали следующий раунд');
+                    console.log('DEBUG: Мы инициировали следующий раунд', nextRoundNumber);
                     
                     // Генерируем новые случайные издержки
                     const actualCost = gameState.possibleCosts[Math.floor(Math.random() * gameState.possibleCosts.length)];
+                    console.log('DEBUG: Новые издержки для раунда', nextRoundNumber, '=', actualCost);
                     
                     const updates = {
                         actualCost: actualCost,
@@ -1653,31 +1635,47 @@
                     // Сбрасываем ready, belief, contribution у всех игроков
                     database.ref(`rooms/${gameState.roomCode}/players`).once('value').then(snapshot => {
                         const players = snapshot.val();
+                        if (!players) {
+                            console.error('ERROR: Нет игроков в комнате');
+                            return;
+                        }
+                        
                         Object.keys(players).forEach(playerId => {
                             updates[`players/${playerId}/ready`] = false;
                             updates[`players/${playerId}/belief`] = 0;
                             updates[`players/${playerId}/contribution`] = 0;
                         });
                         
-                        console.log('DEBUG: Применяем обновления для следующего раунда');
-                        database.ref(`rooms/${gameState.roomCode}`).update(updates);
+                        console.log('DEBUG: Применяем обновления для раунда', nextRoundNumber);
+                        return database.ref(`rooms/${gameState.roomCode}`).update(updates);
+                    }).then(() => {
+                        console.log('DEBUG: Обновления для раунда', nextRoundNumber, 'применены успешно!');
+                    }).catch(error => {
+                        console.error('ERROR: Ошибка при обновлении для следующего раунда:', error);
                     });
+                } else if (!committed) {
+                    console.log('DEBUG: Следующий раунд уже был инициирован другим игроком');
                 }
             });
         }
 
         // Обновление истории игры
         function updateHistory() {
-            if (gameState.currentRound <= 1) return;
+            if (gameState.currentRound <= 1) {
+                document.getElementById('history-section').style.display = 'none';
+                return;
+            }
             
             database.ref(`rooms/${gameState.roomCode}/history`).once('value').then(snapshot => {
                 const history = snapshot.val() || {};
                 const table = document.getElementById('history-table');
                 table.innerHTML = '';
                 
+                let hasHistory = false;
                 for (let round = 1; round < gameState.currentRound; round++) {
                     const roundData = history[`round${round}`];
                     if (roundData && roundData.results && roundData.results[gameState.playerId]) {
+                        hasHistory = true;
                         const myResult = roundData.results[gameState.playerId];
                         const row = table.insertRow();
                         row.innerHTML = `
@@ -1690,6 +1688,12 @@
                         `;
                     }
                 }
+                
+                if (hasHistory) {
+                    document.getElementById('history-section').style.display = 'block';
+                }
+            }).catch(error => {
+                console.error('ERROR: Ошибка загрузки истории:', error);
             });
         }
 
@@ -1699,6 +1703,7 @@
 
         // Финальные результаты
         function showFinalResults(roomData) {
+            console.log('DEBUG: ✅ Показ финальных результатов!');
             showScreen('final-screen');
             
             const playersArray = Object.values(roomData.players || {});
