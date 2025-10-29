@@ -3,126 +3,782 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Экономический эксперимент: Дилемма распределения издержек</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Дилемма распределения издержек - Multiplayer</title>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        :root {
+            /* Primitive Color Tokens */
+            --color-white: rgba(255, 255, 255, 1);
+            --color-black: rgba(0, 0, 0, 1);
+            --color-cream-50: rgba(252, 252, 249, 1);
+            --color-cream-100: rgba(255, 255, 253, 1);
+            --color-gray-200: rgba(245, 245, 245, 1);
+            --color-gray-300: rgba(167, 169, 169, 1);
+            --color-gray-400: rgba(119, 124, 124, 1);
+            --color-slate-500: rgba(98, 108, 113, 1);
+            --color-brown-600: rgba(94, 82, 64, 1);
+            --color-charcoal-700: rgba(31, 33, 33, 1);
+            --color-charcoal-800: rgba(38, 40, 40, 1);
+            --color-slate-900: rgba(19, 52, 59, 1);
+            --color-teal-300: rgba(50, 184, 198, 1);
+            --color-teal-400: rgba(45, 166, 178, 1);
+            --color-teal-500: rgba(33, 128, 141, 1);
+            --color-teal-600: rgba(29, 116, 128, 1);
+            --color-teal-700: rgba(26, 104, 115, 1);
+            --color-teal-800: rgba(41, 150, 161, 1);
+            --color-red-400: rgba(255, 84, 89, 1);
+            --color-red-500: rgba(192, 21, 47, 1);
+            --color-orange-400: rgba(230, 129, 97, 1);
+            --color-orange-500: rgba(168, 75, 47, 1);
+
+            /* RGB versions for opacity control */
+            --color-brown-600-rgb: 94, 82, 64;
+            --color-teal-500-rgb: 33, 128, 141;
+            --color-slate-900-rgb: 19, 52, 59;
+            --color-slate-500-rgb: 98, 108, 113;
+            --color-red-500-rgb: 192, 21, 47;
+            --color-red-400-rgb: 255, 84, 89;
+            --color-orange-500-rgb: 168, 75, 47;
+            --color-orange-400-rgb: 230, 129, 97;
+
+            /* Background color tokens (Light Mode) */
+            --color-bg-1: rgba(59, 130, 246, 0.08);
+            --color-bg-2: rgba(245, 158, 11, 0.08);
+            --color-bg-3: rgba(34, 197, 94, 0.08);
+            --color-bg-4: rgba(239, 68, 68, 0.08);
+            --color-bg-5: rgba(147, 51, 234, 0.08);
+            --color-bg-6: rgba(249, 115, 22, 0.08);
+            --color-bg-7: rgba(236, 72, 153, 0.08);
+            --color-bg-8: rgba(6, 182, 212, 0.08);
+
+            /* Semantic Color Tokens (Light Mode) */
+            --color-background: var(--color-cream-50);
+            --color-surface: var(--color-cream-100);
+            --color-text: var(--color-slate-900);
+            --color-text-secondary: var(--color-slate-500);
+            --color-primary: var(--color-teal-500);
+            --color-primary-hover: var(--color-teal-600);
+            --color-primary-active: var(--color-teal-700);
+            --color-secondary: rgba(var(--color-brown-600-rgb), 0.12);
+            --color-secondary-hover: rgba(var(--color-brown-600-rgb), 0.2);
+            --color-secondary-active: rgba(var(--color-brown-600-rgb), 0.25);
+            --color-border: rgba(var(--color-brown-600-rgb), 0.2);
+            --color-btn-primary-text: var(--color-cream-50);
+            --color-card-border: rgba(var(--color-brown-600-rgb), 0.12);
+            --color-card-border-inner: rgba(var(--color-brown-600-rgb), 0.12);
+            --color-error: var(--color-red-500);
+            --color-success: var(--color-teal-500);
+            --color-warning: var(--color-orange-500);
+            --color-info: var(--color-slate-500);
+            --color-focus-ring: rgba(var(--color-teal-500-rgb), 0.4);
+            --color-select-caret: rgba(var(--color-slate-900-rgb), 0.8);
+
+            /* Common style patterns */
+            --focus-ring: 0 0 0 3px var(--color-focus-ring);
+            --focus-outline: 2px solid var(--color-primary);
+            --status-bg-opacity: 0.15;
+            --status-border-opacity: 0.25;
+
+            /* Typography */
+            --font-family-base: "Geist", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --font-family-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            --font-size-xs: 11px;
+            --font-size-sm: 12px;
+            --font-size-base: 14px;
+            --font-size-md: 14px;
+            --font-size-lg: 16px;
+            --font-size-xl: 18px;
+            --font-size-2xl: 20px;
+            --font-size-3xl: 24px;
+            --font-size-4xl: 30px;
+            --font-weight-normal: 400;
+            --font-weight-medium: 500;
+            --font-weight-semibold: 550;
+            --font-weight-bold: 600;
+            --line-height-tight: 1.2;
+            --line-height-normal: 1.5;
+            --letter-spacing-tight: -0.01em;
+
+            /* Spacing */
+            --space-0: 0;
+            --space-1: 1px;
+            --space-2: 2px;
+            --space-4: 4px;
+            --space-6: 6px;
+            --space-8: 8px;
+            --space-10: 10px;
+            --space-12: 12px;
+            --space-16: 16px;
+            --space-20: 20px;
+            --space-24: 24px;
+            --space-32: 32px;
+
+            /* Border Radius */
+            --radius-sm: 6px;
+            --radius-base: 8px;
+            --radius-md: 10px;
+            --radius-lg: 12px;
+            --radius-full: 9999px;
+
+            /* Shadows */
+            --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.02);
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.04), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+            --shadow-inset-sm: inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.03);
+
+            /* Animation */
+            --duration-fast: 150ms;
+            --duration-normal: 250ms;
+            --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: var(--font-size-base);
+            font-family: var(--font-family-base);
+            line-height: var(--line-height-normal);
+            color: var(--color-text);
+            background-color: var(--color-background);
+            -webkit-font-smoothing: antialiased;
+        }
+
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 0;
             min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        .main-container {
+
+        .container {
             max-width: 900px;
-            margin: 30px auto;
-            padding: 20px;
+            margin: 0 auto;
+            padding: var(--space-20);
         }
-        .game-card {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            animation: fadeIn 0.5s;
+
+        .screen {
+            display: none;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all var(--duration-normal) var(--ease-standard);
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+
+        .screen.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
         }
-        .room-code {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #667eea;
-            letter-spacing: 5px;
-            cursor: pointer;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            transition: all 0.3s;
+
+        .card {
+            background-color: var(--color-surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-card-border);
+            box-shadow: var(--shadow-sm);
+            padding: var(--space-24);
+            margin-bottom: var(--space-16);
         }
-        .room-code:hover {
-            background: #e9ecef;
-            transform: scale(1.05);
+
+        .card h1, .card h2, .card h3 {
+            margin-bottom: var(--space-16);
+            color: var(--color-text);
+            font-weight: var(--font-weight-semibold);
         }
-        .player-item {
-            padding: 15px;
-            margin: 10px 0;
-            background: #f8f9fa;
-            border-radius: 10px;
-            display: flex;
-            justify-content: space-between;
+
+        .card h1 {
+            font-size: var(--font-size-3xl);
+            text-align: center;
+        }
+
+        .card h2 {
+            font-size: var(--font-size-2xl);
+        }
+
+        .card h3 {
+            font-size: var(--font-size-xl);
+        }
+
+        .btn {
+            display: inline-flex;
             align-items: center;
-        }
-        .player-ready {
-            background: #d4edda;
-            border: 2px solid #28a745;
-        }
-        .slider-container {
-            margin: 30px 0;
-        }
-        .contribution-value {
-            font-size: 2rem;
-            color: #667eea;
-            font-weight: bold;
-        }
-        .results-table {
-            margin-top: 20px;
-        }
-        .success-badge {
-            background: #28a745;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 1.2rem;
-        }
-        .fail-badge {
-            background: #dc3545;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 1.2rem;
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            justify-content: center;
+            padding: var(--space-12) var(--space-20);
+            border-radius: var(--radius-base);
+            font-size: var(--font-size-base);
+            font-weight: var(--font-weight-medium);
+            cursor: pointer;
+            transition: all var(--duration-normal) var(--ease-standard);
             border: none;
-            padding: 12px 30px;
-            font-size: 1.1rem;
-            border-radius: 10px;
+            text-decoration: none;
+            min-width: 120px;
         }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+
+        .btn--primary {
+            background: var(--color-primary);
+            color: var(--color-btn-primary-text);
         }
+
+        .btn--primary:hover {
+            background: var(--color-primary-hover);
+        }
+
+        .btn--primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn--secondary {
+            background: var(--color-secondary);
+            color: var(--color-text);
+        }
+
+        .btn--secondary:hover {
+            background: var(--color-secondary-hover);
+        }
+
+        .form-control {
+            display: block;
+            width: 100%;
+            padding: var(--space-12);
+            font-size: var(--font-size-base);
+            line-height: 1.5;
+            color: var(--color-text);
+            background-color: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-base);
+            margin-bottom: var(--space-16);
+        }
+
+        .form-control:focus {
+            border-color: var(--color-primary);
+            outline: var(--focus-outline);
+        }
+
+        .form-group {
+            margin-bottom: var(--space-16);
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: var(--space-8);
+            font-weight: var(--font-weight-medium);
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-8);
+            margin-bottom: var(--space-16);
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: var(--space-8);
+            padding: var(--space-8);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-base);
+            cursor: pointer;
+            transition: all var(--duration-fast) var(--ease-standard);
+        }
+
+        .radio-option:hover {
+            background-color: var(--color-secondary);
+        }
+
+        .radio-option.selected {
+            background-color: var(--color-bg-3);
+            border-color: var(--color-success);
+        }
+
         .progress-bar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: 100%;
+            height: 8px;
+            background-color: var(--color-secondary);
+            border-radius: var(--radius-full);
+            overflow: hidden;
+            margin-bottom: var(--space-20);
         }
-        .waiting-spinner {
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--color-primary);
+            transition: width var(--duration-normal) var(--ease-standard);
+        }
+
+        .slider-container {
+            margin: var(--space-16) 0;
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: var(--radius-full);
+            background: var(--color-secondary);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--color-primary);
+            cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--color-primary);
+            cursor: pointer;
+            border: none;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: var(--space-16);
+        }
+
+        .table th,
+        .table td {
+            padding: var(--space-8) var(--space-12);
+            text-align: left;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .table th {
+            background-color: var(--color-secondary);
+            font-weight: var(--font-weight-semibold);
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            padding: var(--space-4) var(--space-8);
+            border-radius: var(--radius-full);
+            font-weight: var(--font-weight-medium);
+            font-size: var(--font-size-sm);
+        }
+
+        .status--success {
+            background-color: rgba(var(--color-teal-500-rgb), var(--status-bg-opacity));
+            color: var(--color-success);
+            border: 1px solid rgba(var(--color-teal-500-rgb), var(--status-border-opacity));
+        }
+
+        .status--error {
+            background-color: rgba(var(--color-red-500-rgb), var(--status-bg-opacity));
+            color: var(--color-error);
+            border: 1px solid rgba(var(--color-red-500-rgb), var(--status-border-opacity));
+        }
+
+        .grid {
+            display: grid;
+            gap: var(--space-16);
+        }
+
+        .grid-2 {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-large {
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-weight-medium);
+        }
+
+        .mb-16 {
+            margin-bottom: var(--space-16);
+        }
+
+        .mb-8 {
+            margin-bottom: var(--space-8);
+        }
+
+        .error-message {
+            color: var(--color-error);
+            font-size: var(--font-size-sm);
+            margin-top: var(--space-4);
+        }
+
+        .highlight {
+            background-color: var(--color-bg-2);
+            padding: var(--space-16);
+            border-radius: var(--radius-base);
+            margin: var(--space-16) 0;
+        }
+        
+        .copy-hint {
+            font-size: var(--font-size-xs);
+            color: var(--color-text-secondary);
+            opacity: 0.7;
+        }
+        
+        .loading {
             display: inline-block;
             width: 20px;
             height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
+            border: 3px solid var(--color-secondary);
             border-radius: 50%;
-            animation: spin 1s linear infinite;
+            border-top-color: var(--color-primary);
+            animation: spin 1s ease-in-out infinite;
         }
+        
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .player-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-8);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-base);
+            margin-bottom: var(--space-8);
+            transition: background-color var(--duration-fast) var(--ease-standard);
+        }
+        
+        .player-status.current-player {
+            font-weight: var(--font-weight-bold);
+            background-color: var(--color-bg-1);
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: var(--space-4);
+        }
+
+        .contribution-display {
+            font-size: var(--font-size-2xl);
+            font-weight: var(--font-weight-bold);
+            color: var(--color-primary);
+            text-align: center;
+            margin: var(--space-16) 0;
+        }
+
+        .chart-container {
+            height: 300px;
+            margin: var(--space-20) 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: var(--space-16);
+            }
+            
+            .card {
+                padding: var(--space-16);
+            }
+            
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="main-container">
-        <div class="game-card" id="gameContainer">
-            <!-- Контент будет динамически загружаться здесь -->
+    <div class="container">
+        <!-- Стартовый экран -->
+        <div id="start-screen" class="screen active">
+            <div class="card">
+                <h1>🎯 Дилемма распределения издержек</h1>
+                <p class="text-center mb-16">Многопользовательский экономический эксперимент</p>
+                
+                <div class="form-group">
+                    <label class="form-label" for="player-name">Ваше имя:</label>
+                    <input type="text" id="player-name" class="form-control" placeholder="Введите ваше имя">
+                    <div id="name-error" class="error-message" style="display: none;"></div>
+                </div>
+                
+                <div class="grid grid-2">
+                    <button class="btn btn--primary" onclick="createRoom()">Создать комнату</button>
+                    <button class="btn btn--secondary" onclick="showJoinRoom()">Присоединиться</button>
+                </div>
+                
+                <div id="join-room-section" style="display: none; margin-top: 16px;">
+                    <div class="form-group">
+                        <label class="form-label" for="room-code">Код комнаты:</label>
+                        <input type="text" id="room-code" class="form-control" placeholder="ABC123" maxlength="6">
+                    </div>
+                    <button class="btn btn--primary btn--full-width" onclick="joinRoom()">Войти в комнату</button>
+                </div>
+                
+                <div class="highlight">
+                    <h3>📋 Краткие правила:</h3>
+                    <ul style="margin-left: 20px;">
+                        <li>4 игрока создают общественное благо</li>
+                        <li>Издержки неизвестны: 60, 80, 100, 120 или 140</li>
+                        <li>Если сумма взносов ≥ издержек → проект создан</li>
+                        <li>Выигрыш: 50 - ваш взнос (если создан) или -ваш взнос (если провален)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Лобби -->
+        <div id="lobby-screen" class="screen">
+            <div class="card">
+                <h2>🏠 Комната <span id="lobby-room-code"></span></h2>
+                <p class="text-center mb-16">Поделитесь кодом с друзьями</p>
+                
+                <div class="highlight text-center" style="margin-bottom: 24px;">
+                    <h3 id="room-code-display" style="font-size: 32px; letter-spacing: 4px; cursor: pointer;" onclick="copyRoomCode()"></h3>
+                    <p style="font-size: 12px; color: var(--color-text-secondary);">Нажмите, чтобы скопировать</p>
+                </div>
+                
+                <div class="form-group">
+                    <h3>👥 Игроки в комнате (<span id="player-count">1</span>/4):</h3>
+                    <div id="players-list"></div>
+                </div>
+                
+                <div class="text-center">
+                    <p class="mb-8">Игроков готово: <span id="ready-count">0</span>/4</p>
+                    <button id="ready-btn" class="btn btn--primary" onclick="toggleReady()">Я готов!</button>
+                    <button class="btn btn--secondary" onclick="leaveRoom()" style="margin-left: 16px;">Покинуть</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Экран инструкций -->
+        <div id="instructions-screen" class="screen">
+            <div class="card">
+                <h2>📋 Правила игры</h2>
+                
+                <div class="highlight">
+                    <h3>Начальные условия:</h3>
+                    <ul style="margin-left: 20px; margin-bottom: 16px;">
+                        <li>У каждого участника есть <strong>100 монет</strong></li>
+                        <li>Группа из <strong>4 участников</strong> может создать общественное благо</li>
+                        <li>Это благо будет поровну разделено между всеми (<strong>по 50 монет каждому</strong>)</li>
+                    </ul>
+                </div>
+
+                <div class="highlight">
+                    <h3>🎲 Неопределенность:</h3>
+                    <ul style="margin-left: 20px; margin-bottom: 16px;">
+                        <li>Реальная стоимость создания блага <strong>неизвестна заранее</strong></li>
+                        <li>Она может быть: <strong>60, 80, 100, 120 или 140 монет</strong></li>
+                        <li>Стоимость определяется <strong>случайно в каждом раунде</strong></li>
+                    </ul>
+                </div>
+
+                <div class="highlight">
+                    <h3>⚙️ Механизм:</h3>
+                    <ul style="margin-left: 20px; margin-bottom: 16px;">
+                        <li>Каждый участник делает взнос (от 0 до 100)</li>
+                        <li>Если <strong>сумма всех взносов ≥ реальная стоимость</strong> → проект <span class="status status--success">СОЗДАН</span></li>
+                        <li>Если <strong>сумма &lt; стоимость</strong> → проект <span class="status status--error">ПРОВАЛЕН</span>, взносы потеряны</li>
+                    </ul>
+                </div>
+
+                <div class="highlight">
+                    <h3>💰 Расчет выигрыша:</h3>
+                    <ul style="margin-left: 20px; margin-bottom: 16px;">
+                        <li><strong>Проект создан:</strong> выигрыш = 50 - ваш взнос</li>
+                        <li><strong>Проект провален:</strong> выигрыш = -ваш взнос</li>
+                    </ul>
+                </div>
+
+                <p class="text-center"><strong>🎯 ЦЕЛЬ: Максимизировать свой общий выигрыш за 5 раундов</strong></p>
+            </div>
+
+            <div class="card">
+                <h3>❓ Контрольные вопросы</h3>
+                <p>Ответьте на все вопросы правильно, чтобы продолжить:</p>
+                
+                <div id="quiz-questions"></div>
+                
+                <div id="quiz-error" class="error-message" style="display: none;"></div>
+                
+                <div class="text-center">
+                    <button class="btn btn--primary" onclick="checkQuiz()">Я понял правила, начать эксперимент</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Экран раунда -->
+        <div id="round-screen" class="screen">
+            <div class="progress-bar">
+                <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
+            </div>
+            
+            <div class="card">
+                <h2 id="round-title">Раунд 1 из 5</h2>
+                
+                <div class="grid grid-2">
+                    <div>
+                        <h3>👥 Статус игроков:</h3>
+                        <div id="players-status"></div>
+                    </div>
+                    <div>
+                        <h3>📊 Очки:</h3>
+                        <div id="scores-display"></div>
+                    </div>
+                </div>
+                
+                <div id="history-section" style="display: none;">
+                    <h3>📊 История предыдущих раундов</h3>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Раунд</th>
+                                <th>Ваш прогноз</th>
+                                <th>Ваш взнос</th>
+                                <th>Реальные издержки</th>
+                                <th>Статус</th>
+                                <th>Выигрыш</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-table"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>🔮 Шаг 1: Ваш прогноз</h3>
+                <p class="mb-16">Как вы думаете, какими будут реальные издержки в этом раунде?</p>
+                
+                <div id="expectation-options" class="radio-group"></div>
+                
+                <div id="step1-error" class="error-message" style="display: none;"></div>
+            </div>
+
+            <div id="contribution-section" class="card" style="display: none;">
+                <h3>💰 Шаг 2: Ваш взнос</h3>
+                <p class="mb-16">Ваш прогноз: <span id="selected-expectation" class="text-large"></span> монет</p>
+                
+                <div class="highlight">
+                    <p><strong>💡 Подсказка:</strong> Проект создается только если сумма всех взносов ≥ реальным издержкам. 
+                    Если проект создан, вы получите 50 монет минус ваш взнос. Если провален - потеряете весь взнос.</p>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Ваш взнос (0-100 монет):</label>
+                    <div class="slider-container">
+                        <input type="range" id="contribution-slider" class="slider" min="0" max="100" value="25">
+                        <div class="contribution-display" id="contribution-value">25 монет</div>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <button class="btn btn--primary" onclick="submitRound()">Подтвердить решение</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Экран ожидания -->
+        <div id="waiting-screen" class="screen">
+            <div class="card text-center">
+                <h2>⏳ Ожидание других игроков...</h2>
+                <p class="mb-16">Ваши решения отправлены. Ждем остальных.</p>
+                
+                <div id="waiting-status"></div>
+                
+                <div class="highlight">
+                    <p>💡 Когда все игроки сделают свой выбор, мы покажем результаты раунда.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Экран результатов раунда -->
+        <div id="results-screen" class="screen">
+            <div class="card">
+                <h2 id="results-title">Результаты раунда 1</h2>
+                
+                <div class="grid grid-2">
+                    <div>
+                        <h3>📊 Результаты группы</h3>
+                        <table class="table">
+                            <tbody id="round-results-table"></tbody>
+                        </table>
+                    </div>
+                    
+                    <div>
+                        <h3>💰 Ваши результаты</h3>
+                        <div class="highlight">
+                            <p><strong>Статус проекта:</strong> <span id="project-status"></span></p>
+                            <p><strong>Ваш выигрыш в раунде:</strong> <span id="round-payoff" class="text-large"></span> монет</p>
+                            <p><strong>Накопленный выигрыш:</strong> <span id="total-payoff" class="text-large"></span> монет</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <button id="next-round-btn" class="btn btn--primary" onclick="nextRound()">Следующий раунд</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Финальный экран -->
+        <div id="final-screen" class="screen">
+            <div class="card">
+                <h1>🎉 Эксперимент завершен!</h1>
+                
+                <div class="grid grid-2">
+                    <div>
+                        <h3>📈 Ваши результаты</h3>
+                        <div class="highlight">
+                            <p class="text-large"><strong>Общий выигрыш:</strong> <span id="final-total-payoff"></span> монет</p>
+                            <p><strong>Средний выигрыш за раунд:</strong> <span id="average-payoff"></span> монет</p>
+                            <p><strong>Успешных проектов:</strong> <span id="successful-projects"></span> из 5</p>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3>📊 График ваших результатов</h3>
+                        <div class="chart-container">
+                            <canvas id="payoff-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>📋 Детальная статистика</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Раунд</th>
+                            <th>Прогноз</th>
+                            <th>Взнос</th>
+                            <th>Реальные издержки</th>
+                            <th>Сумма группы</th>
+                            <th>Статус</th>
+                            <th>Выигрыш</th>
+                        </tr>
+                    </thead>
+                    <tbody id="final-results-table"></tbody>
+                </table>
+            </div>
+            
+            <div class="card text-center">
+                <button class="btn btn--primary" onclick="downloadResults()" style="margin-right: 16px;">📁 Скачать результаты CSV</button>
+                <button class="btn btn--secondary" onclick="restartGame()">🔄 Начать заново</button>
+            </div>
         </div>
     </div>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-
     <script>
-        // FIREBASE КОНФИГУРАЦИЯ (УЖЕ ПОДСТАВЛЕНА)
-        const firebaseConfig = {
+        // ═══════════════════════════════════════════════════════════════
+        // ВАЖНО! ВСТАВЬ СЮДА СВОЮ КОНФИГУРАЦИЮ ИЗ FIREBASE CONSOLE
+        // ═══════════════════════════════════════════════════════════════
+          const firebaseConfig = {
             apiKey: "AIzaSyBdqtRnPhfqgYJYSMR5TZucmVHTuE4WTY8",
             authDomain: "cost-sharing-game.firebaseapp.com",
             databaseURL: "https://cost-sharing-game-default-rtdb.firebaseio.com",
@@ -130,743 +786,1158 @@
             storageBucket: "cost-sharing-game.firebasestorage.app",
             messagingSenderId: "882128282715",
             appId: "1:882128282715:web:2fc86b8c68cbf3ccc44b7e"
-        };
+          };
+        // ═══════════════════════════════════════════════════════════════
 
         // Инициализация Firebase
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+        let app, database;
+        try {
+            app = firebase.initializeApp(firebaseConfig);
+            database = firebase.database();
+            console.log('Firebase initialized successfully');
+        } catch (error) {
+            console.error('Firebase initialization failed:', error);
+            alert('Firebase не настроен. Проверьте конфигурацию в коде.');
+        }
 
-        // Глобальные переменные
-        let playerName = '';
-        let playerId = '';
-        let roomCode = '';
-        let isHost = false;
-        let currentRoomRef = null;
-
-        // Параметры игры
-        const GAME_PARAMS = {
-            maxPlayers: 4,
-            numRounds: 5,
-            initialCapital: 100,
-            benefitValue: 200,
-            individualBenefit: 50,
-            possibleCosts: [60, 80, 100, 120, 140]
+        // Игровые данные и состояние
+        const gameState = {
+            playerId: null,
+            playerName: '',
+            roomCode: '',
+            isHost: false,
+            currentRound: 1,
+            possibleCosts: [60, 80, 100, 120, 140],
+            roomRef: null,
+            playersRef: null,
+            gameHistory: [],
+            currentScreen: 'start-screen'
         };
 
-        // Генерация уникального ID игрока
-        function generatePlayerId() {
-            return 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        }
-
-        // Генерация кода комнаты
+        // Утилиты для работы с Firebase
         function generateRoomCode() {
             const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-            let code = '';
+            let result = '';
             for (let i = 0; i < 6; i++) {
-                code += chars.charAt(Math.floor(Math.random() * chars.length));
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
             }
-            return code;
+            return result;
         }
 
-        // ЭКРАН 1: Главный экран
-        function showHomeScreen() {
-            const container = document.getElementById('gameContainer');
-            container.innerHTML = `
-                <h1 class="text-center mb-4">Многопользовательский экономический эксперимент</h1>
-                <p class="text-center text-muted mb-4">Дилемма распределения издержек</p>
-                
-                <div class="mb-4">
-                    <label class="form-label">Введите ваше имя:</label>
-                    <input type="text" id="playerNameInput" class="form-control" placeholder="Ваше имя">
-                </div>
+        function generatePlayerId() {
+            return Date.now().toString() + Math.random().toString(36).substr(2, 9);
+        }
 
-                <div class="d-grid gap-3">
-                    <button class="btn btn-primary btn-lg" onclick="createRoom()">Создать новую комнату</button>
-                    <div class="text-center">или</div>
-                    <div class="input-group">
-                        <input type="text" id="joinRoomInput" class="form-control" placeholder="Введите код комнаты" maxlength="6">
-                        <button class="btn btn-primary" onclick="joinRoom()">Присоединиться</button>
-                    </div>
-                </div>
+        // Проверка соединения с Firebase
+        function checkFirebaseConnection() {
+            if (!database || firebaseConfig.apiKey === "YOUR_API_KEY_HERE") {
+                showError('🔥 Firebase не настроен!\n\nПожалуйста, замените все placeholderы (YOUR_*) в firebaseConfig на реальные данные из Firebase Console.');
+                return false;
+            }
+            return true;
+        }
 
-                <div class="mt-5">
-                    <h5>Краткие правила:</h5>
-                    <ul class="text-muted">
-                        <li>В группе 4 игрока</li>
-                        <li>5 раундов</li>
-                        <li>Каждый раунд: прогноз издержек → взнос</li>
-                        <li>Если сумма взносов ≥ издержки → проект создан</li>
-                        <li>Цель: максимизировать свой итоговый счет</li>
-                    </ul>
-                </div>
-            `;
+        // Инициализация игры
+        function initGame() {
+            gameState.playerId = generatePlayerId();
+            console.log('DEBUG: Игра инициализирована, Player ID:', gameState.playerId);
+            showScreen('start-screen');
+            setupSlider();
+            setupPresence();
+        }
+
+        // Настройка presence системы
+        function setupPresence() {
+            if (!database) return;
+            
+            // Отслеживание состояния подключения
+            const connectedRef = database.ref('.info/connected');
+            connectedRef.on('value', (snap) => {
+                if (snap.val() === true) {
+                    console.log('Connected to Firebase');
+                } else {
+                    console.log('Disconnected from Firebase');
+                }
+            });
+        }
+
+        // Отображение экранов
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+            gameState.currentScreen = screenId;
+        }
+
+        function showError(message, elementId = null) {
+            if (elementId) {
+                const errorDiv = document.getElementById(elementId);
+                if (errorDiv) {
+                    errorDiv.textContent = message;
+                    errorDiv.style.display = 'block';
+                }
+            } else {
+                alert(message);
+            }
         }
 
         // Создание комнаты
         function createRoom() {
-            playerName = document.getElementById('playerNameInput').value.trim();
+            const playerName = document.getElementById('player-name').value.trim();
             if (!playerName) {
-                alert('Пожалуйста, введите ваше имя');
+                showError('Пожалуйста, введите ваше имя', 'name-error');
                 return;
             }
-
-            playerId = generatePlayerId();
-            roomCode = generateRoomCode();
-            isHost = true;
-
+            
+            if (!checkFirebaseConnection()) return;
+            
+            gameState.playerName = playerName;
+            gameState.roomCode = generateRoomCode();
+            gameState.isHost = true;
+            
+            // Создаем комнату в Firebase
             const roomData = {
                 status: 'waiting',
                 currentRound: 1,
-                host: playerId,
-                createdAt: Date.now(),
-                players: {}
+                roundStartTime: 0,
+                actualCost: 0,
+                host: gameState.playerId,
+                players: {
+                    [gameState.playerId]: {
+                        id: gameState.playerId,
+                        name: playerName,
+                        belief: 0,
+                        contribution: 0,
+                        ready: false,
+                        score: 0,
+                        online: true,
+                        joinedAt: Date.now()
+                    }
+                },
+                history: {}
             };
-
-            roomData.players[playerId] = {
-                name: playerName,
-                score: 0,
-                ready: false,
-                online: true,
-                joinedAt: Date.now()
-            };
-
-            database.ref(`rooms/${roomCode}`).set(roomData).then(() => {
-                currentRoomRef = database.ref(`rooms/${roomCode}`);
-                setupPresence();
-                listenToRoom();
-                showLobby();
-            }).catch(error => {
-                alert('Ошибка создания комнаты: ' + error.message);
-            });
+            
+            database.ref(`rooms/${gameState.roomCode}`).set(roomData)
+                .then(() => {
+                    setupRoomListeners();
+                    showLobby();
+                })
+                .catch(error => {
+                    console.error('Error creating room:', error);
+                    showError('Ошибка создания комнаты');
+                });
         }
-
+        
+        // Показ поля для входа в комнату
+        function showJoinRoom() {
+            document.getElementById('join-room-section').style.display = 'block';
+        }
+        
         // Присоединение к комнате
         function joinRoom() {
-            playerName = document.getElementById('playerNameInput').value.trim();
-            const code = document.getElementById('joinRoomInput').value.trim().toUpperCase();
-
+            const playerName = document.getElementById('player-name').value.trim();
+            const roomCode = document.getElementById('room-code').value.trim().toUpperCase();
+            
             if (!playerName) {
-                alert('Пожалуйста, введите ваше имя');
+                showError('Пожалуйста, введите ваше имя', 'name-error');
                 return;
             }
-
-            if (code.length !== 6) {
-                alert('Код комнаты должен содержать 6 символов');
+            
+            if (!roomCode || roomCode.length !== 6) {
+                showError('Пожалуйста, введите корректный код комнаты');
                 return;
             }
-
-            roomCode = code;
-            playerId = generatePlayerId();
-
-            database.ref(`rooms/${roomCode}`).once('value', snapshot => {
-                if (!snapshot.exists()) {
-                    alert('Комната не найдена');
-                    return;
-                }
-
-                const roomData = snapshot.val();
-                const playerCount = Object.keys(roomData.players || {}).length;
-
-                if (playerCount >= GAME_PARAMS.maxPlayers) {
-                    alert('Комната заполнена (максимум 4 игрока)');
-                    return;
-                }
-
-                database.ref(`rooms/${roomCode}/players/${playerId}`).set({
-                    name: playerName,
-                    score: 0,
-                    ready: false,
-                    online: true,
-                    joinedAt: Date.now()
-                }).then(() => {
-                    currentRoomRef = database.ref(`rooms/${roomCode}`);
-                    setupPresence();
-                    listenToRoom();
-                    showLobby();
-                }).catch(error => {
-                    alert('Ошибка присоединения: ' + error.message);
-                });
-            });
-        }
-
-        // Настройка presence (отслеживание онлайн)
-        function setupPresence() {
-            const playerRef = database.ref(`rooms/${roomCode}/players/${playerId}`);
-            playerRef.child('online').onDisconnect().set(false);
-        }
-
-        // Слушатель изменений комнаты
-        function listenToRoom() {
-            currentRoomRef.on('value', snapshot => {
-                if (!snapshot.exists()) {
-                    alert('Комната была удалена');
-                    showHomeScreen();
-                    return;
-                }
-
-                const roomData = snapshot.val();
-                console.log('Room update:', roomData.status, 'Round:', roomData.currentRound);
-
-                if (roomData.status === 'waiting') {
-                    showLobby();
-                } else if (roomData.status === 'playing') {
-                    const playerData = roomData.players[playerId];
-                    
-                    if (!playerData.belief) {
-                        showBeliefScreen(roomData);
-                    } else if (!playerData.contribution && playerData.contribution !== 0) {
-                        showContributionScreen(roomData);
-                    } else if (!playerData.ready) {
-                        // Игрок сделал вклад, ставим ready
-                        database.ref(`rooms/${roomCode}/players/${playerId}/ready`).set(true);
-                        showWaitingScreen(roomData);
-                    } else if (roomData.roundResults) {
-                        showRoundResults(roomData);
-                    } else {
-                        showWaitingScreen(roomData);
+            
+            if (!checkFirebaseConnection()) return;
+            
+            // Проверяем существование комнаты
+            database.ref(`rooms/${roomCode}`).once('value')
+                .then(snapshot => {
+                    if (!snapshot.exists()) {
+                        showError('Комната не найдена. Проверьте код.');
+                        return;
                     }
-                } else if (roomData.status === 'finished') {
-                    showFinalResults(roomData);
-                }
-            });
-        }
-
-        // ЭКРАН 2: Лобби
-        function showLobby() {
-            currentRoomRef.once('value', snapshot => {
-                const roomData = snapshot.val();
-                const players = roomData.players || {};
-                const playerCount = Object.keys(players).length;
-                const readyCount = Object.values(players).filter(p => p.ready).length;
-
-                const container = document.getElementById('gameContainer');
-                container.innerHTML = `
-                    <h2 class="text-center mb-4">Комната ожидания</h2>
                     
-                    <div class="text-center mb-4">
-                        <p class="mb-2">Код комнаты:</p>
-                        <div class="room-code" onclick="copyRoomCode()" title="Нажмите, чтобы скопировать">${roomCode}</div>
-                        <small class="text-muted">Нажмите, чтобы скопировать</small>
-                    </div>
-
-                    <div class="mb-4">
-                        <h5>Игроки в комнате (${playerCount}/${GAME_PARAMS.maxPlayers}):</h5>
-                        <div id="playersList"></div>
-                    </div>
-
-                    <div class="mb-4">
-                        <div class="progress" style="height: 30px;">
-                            <div class="progress-bar" role="progressbar" style="width: ${(readyCount/GAME_PARAMS.maxPlayers)*100}%">
-                                Игроков готово: ${readyCount}/${GAME_PARAMS.maxPlayers}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="d-grid gap-2">
-                        <button class="btn btn-primary btn-lg" id="readyBtn" onclick="setReady()">
-                            ${players[playerId]?.ready ? '✓ Вы готовы!' : 'Я готов!'}
-                        </button>
-                        <button class="btn btn-outline-secondary" onclick="leaveRoom()">Покинуть комнату</button>
-                    </div>
-
-                    ${playerCount === GAME_PARAMS.maxPlayers && readyCount === GAME_PARAMS.maxPlayers ? 
-                        '<div class="alert alert-success mt-3">Все готовы! Игра начинается...</div>' : 
-                        '<div class="alert alert-info mt-3">Ожидание игроков...</div>'}
-                `;
-
-                // Отображаем список игроков
-                const playersListDiv = document.getElementById('playersList');
-                Object.entries(players).forEach(([pid, player]) => {
-                    const isCurrentPlayer = pid === playerId;
-                    const statusIcon = player.ready ? '✅' : '⏳';
-                    const statusText = player.ready ? 'Готов' : 'Ожидание';
+                    const roomData = snapshot.val();
+                    const playersCount = Object.keys(roomData.players || {}).length;
                     
-                    playersListDiv.innerHTML += `
-                        <div class="player-item ${player.ready ? 'player-ready' : ''}">
-                            <span>${statusIcon} ${player.name} ${isCurrentPlayer ? '(Вы)' : ''}</span>
-                            <span class="badge bg-secondary">${statusText}</span>
-                        </div>
-                    `;
+                    if (playersCount >= 4) {
+                        showError('В комнате уже 4 игрока.');
+                        return;
+                    }
+                    
+                    if (roomData.status !== 'waiting') {
+                        showError('Игра уже началась в этой комнате.');
+                        return;
+                    }
+                    
+                    // Добавляем себя в комнату
+                    gameState.playerName = playerName;
+                    gameState.roomCode = roomCode;
+                    gameState.isHost = false;
+                    
+                    const playerData = {
+                        id: gameState.playerId,
+                        name: playerName,
+                        belief: 0,
+                        contribution: 0,
+                        ready: false,
+                        score: 0,
+                        online: true,
+                        joinedAt: Date.now()
+                    };
+                    
+                    database.ref(`rooms/${roomCode}/players/${gameState.playerId}`).set(playerData)
+                        .then(() => {
+                            setupRoomListeners();
+                            showLobby();
+                        })
+                        .catch(error => {
+                            console.error('Error joining room:', error);
+                            showError('Ошибка при присоединении к комнате');
+                        });
+                })
+                .catch(error => {
+                    console.error('Error checking room:', error);
+                    showError('Ошибка соединения');
                 });
-
-                // Автостарт
-                if (isHost && playerCount === GAME_PARAMS.maxPlayers && readyCount === GAME_PARAMS.maxPlayers) {
-                    setTimeout(() => startGame(), 2000);
-                }
-            });
         }
 
-        function copyRoomCode() {
-            navigator.clipboard.writeText(roomCode);
-            alert('Код комнаты скопирован: ' + roomCode);
-        }
-
-        function setReady() {
-            database.ref(`rooms/${roomCode}/players/${playerId}/ready`).set(true);
-        }
-
-        function leaveRoom() {
-            if (currentRoomRef) {
-                currentRoomRef.off();
-                database.ref(`rooms/${roomCode}/players/${playerId}`).remove();
-            }
-            showHomeScreen();
-        }
-
-        function startGame() {
-            database.ref(`rooms/${roomCode}`).update({
-                status: 'playing',
-                currentRound: 1
-            });
+        // Настройка слушателей комнаты
+        function setupRoomListeners() {
+            if (!gameState.roomCode) return;
             
-            // Сбрасываем ready у всех
-            currentRoomRef.child('players').once('value', snapshot => {
-                const updates = {};
-                snapshot.forEach(childSnapshot => {
-                    updates[`players/${childSnapshot.key}/ready`] = false;
-                    updates[`players/${childSnapshot.key}/belief`] = null;
-                    updates[`players/${childSnapshot.key}/contribution`] = null;
-                });
-                database.ref(`rooms/${roomCode}`).update(updates);
-            });
+            gameState.roomRef = database.ref(`rooms/${gameState.roomCode}`);
+            gameState.playersRef = database.ref(`rooms/${gameState.roomCode}/players`);
+            
+            // Отслеживание изменений в комнате
+            gameState.roomRef.on('value', handleRoomUpdate);
+            
+            // Отслеживание изменений списка игроков
+            gameState.playersRef.on('value', handlePlayersUpdate);
+            
+            // Настройка presence
+            setupPlayerPresence();
+        }
+        
+        // Настройка presence для игрока
+        function setupPlayerPresence() {
+            if (!gameState.roomCode || !gameState.playerId) return;
+            
+            const playerRef = database.ref(`rooms/${gameState.roomCode}/players/${gameState.playerId}`);
+            const presenceRef = database.ref(`rooms/${gameState.roomCode}/players/${gameState.playerId}/online`);
+            
+            // При отключении установить online = false
+            presenceRef.onDisconnect().set(false);
+            
+            // Установить online = true
+            presenceRef.set(true);
         }
 
-        // ЭКРАН 3: Опрос ожиданий
-        function showBeliefScreen(roomData) {
-            const container = document.getElementById('gameContainer');
-            container.innerHTML = `
-                <h2 class="text-center mb-4">Раунд ${roomData.currentRound} из ${GAME_PARAMS.numRounds}</h2>
-                
-                <div class="alert alert-info">
-                    <strong>Шаг 1:</strong> Какими будут реальные издержки в этом раунде?
-                </div>
-
-                <div class="mb-4">
-                    <h5>Ваш прогноз:</h5>
-                    ${GAME_PARAMS.possibleCosts.map(cost => `
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="radio" name="belief" id="belief${cost}" value="${cost}">
-                            <label class="form-check-label" for="belief${cost}">
-                                ${cost} монет
-                            </label>
-                        </div>
-                    `).join('')}
-                </div>
-
-                <button class="btn btn-primary btn-lg w-100" onclick="submitBelief()">Далее</button>
-            `;
-        }
-
-        function submitBelief() {
-            const selected = document.querySelector('input[name="belief"]:checked');
-            if (!selected) {
-                alert('Выберите ваш прогноз');
+        // Обработка обновлений комнаты
+        function handleRoomUpdate(snapshot) {
+            if (!snapshot.exists()) {
+                console.error('ERROR: Комната удалена');
+                showError('Комната была удалена');
+                leaveRoom();
                 return;
             }
-
-            database.ref(`rooms/${roomCode}/players/${playerId}/belief`).set(parseInt(selected.value));
-        }
-
-        // ЭКРАН 4: Ввод взноса
-        function showContributionScreen(roomData) {
-            const playerBelief = roomData.players[playerId].belief;
-            const container = document.getElementById('gameContainer');
             
-            container.innerHTML = `
-                <h2 class="text-center mb-4">Раунд ${roomData.currentRound} из ${GAME_PARAMS.numRounds}</h2>
-                
-                <div class="alert alert-success">
-                    Ваш прогноз: <strong>${playerBelief} монет</strong>
-                </div>
-
-                <div class="alert alert-info">
-                    <strong>Шаг 2:</strong> Какой взнос вы готовы сделать?
-                </div>
-
-                <div class="slider-container">
-                    <label class="form-label">Ваш взнос:</label>
-                    <div class="text-center contribution-value mb-3">
-                        <span id="contributionDisplay">50</span> монет
-                    </div>
-                    <input type="range" class="form-range" id="contributionSlider" min="0" max="100" value="50" 
-                           oninput="document.getElementById('contributionDisplay').textContent = this.value">
-                </div>
-
-                <div class="alert alert-warning">
-                    <small>
-                        • Если сумма всех взносов ≥ реальные издержки → проект создан, вы получите 50 - ваш_взнос<br>
-                        • Если сумма < издержки → проект провален, вы теряете взнос
-                    </small>
-                </div>
-
-                <button class="btn btn-primary btn-lg w-100" onclick="submitContribution()">Подтвердить взнос</button>
-            `;
-        }
-
-        function submitContribution() {
-            const contribution = parseInt(document.getElementById('contributionSlider').value);
-            
-            database.ref(`rooms/${roomCode}/players/${playerId}`).update({
-                contribution: contribution,
-                ready: true
-            }).then(() => {
-                checkAllReady();
+            const roomData = snapshot.val();
+            console.log('DEBUG: handleRoomUpdate -', {
+                status: roomData.status,
+                currentRound: roomData.currentRound,
+                currentScreen: gameState.currentScreen,
+                roundCalculated: roomData.roundCalculated
             });
-        }
-
-        // ЭКРАН 5: Ожидание других
-        function showWaitingScreen(roomData) {
-            const players = roomData.players || {};
-            const readyCount = Object.values(players).filter(p => p.ready).length;
-            const totalPlayers = Object.keys(players).length;
-
-            const container = document.getElementById('gameContainer');
-            container.innerHTML = `
-                <h2 class="text-center mb-4">Раунд ${roomData.currentRound} из ${GAME_PARAMS.numRounds}</h2>
-                
-                <div class="text-center mb-4">
-                    <div class="waiting-spinner mb-3" style="width: 60px; height: 60px; border-width: 6px;"></div>
-                    <h4>Ваши решения отправлены. Ждем остальных.</h4>
-                </div>
-
-                <div class="progress mb-3" style="height: 30px;">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" 
-                         style="width: ${(readyCount/totalPlayers)*100}%">
-                        ${readyCount}/${totalPlayers} игроков готовы
-                    </div>
-                </div>
-
-                <div class="alert alert-info">
-                    💡 Когда все игроки сделают свой выбор, мы покажем результаты раунда.
-                </div>
-            `;
-        }
-
-        // Проверка готовности всех игроков
-        function checkAllReady() {
-            currentRoomRef.once('value', snapshot => {
-                const roomData = snapshot.val();
-                const players = roomData.players || {};
-                const allReady = Object.values(players).every(p => p.ready);
-                const playerCount = Object.keys(players).length;
-
-                console.log('Check ready:', Object.values(players).filter(p => p.ready).length, '/', playerCount);
-
-                if (allReady && playerCount > 0 && !roomData.roundResults) {
-                    calculateRoundResults();
+            
+            // Обновляем локальное состояние
+            gameState.currentRound = roomData.currentRound || 1;
+            
+            // Обработка смены статуса игры
+            if (roomData.status === 'waiting' && gameState.currentScreen !== 'lobby-screen') {
+                console.log('DEBUG: Переход в лобби');
+                showLobby();
+            } else if (roomData.status === 'playing') {
+                if (gameState.currentScreen === 'lobby-screen') {
+                    console.log('DEBUG: Старт игрового раунда');
+                    startGameRound(roomData);
+                } else if (gameState.currentScreen === 'waiting-screen') {
+                    console.log('DEBUG: Проверка перехода к результатам из ожидания');
+                    // Проверяем, есть ли уже результаты
+                    if (roomData.history && roomData.history[`round${gameState.currentRound}`]) {
+                        console.log('DEBUG: Результаты найдены, показываем');
+                        showRoundResults(roomData);
+                    }
+                } else if (gameState.currentScreen === 'round-screen') {
+                    // Проверяем, если игрок уже готов, но остальные еще нет
+                    if (roomData.players && roomData.players[gameState.playerId] && roomData.players[gameState.playerId].ready) {
+                        const playersArray = Object.values(roomData.players);
+                        const readyCount = playersArray.filter(p => p.ready).length;
+                        if (readyCount < playersArray.length) {
+                            console.log('DEBUG: Переход на экран ожидания');
+                            showScreen('waiting-screen');
+                        }
+                    }
                 }
+            } else if (roomData.status === 'results') {
+                console.log('DEBUG: Статус results - показываем результаты');
+                if (gameState.currentScreen !== 'results-screen') {
+                    showRoundResults(roomData);
+                }
+            } else if (roomData.status === 'finished') {
+                console.log('DEBUG: Игра завершена');
+                showFinalResults(roomData);
+            }
+        }
+        
+        // Обработка обновлений списка игроков
+        function handlePlayersUpdate(snapshot) {
+            if (!snapshot.exists()) return;
+            
+            const players = snapshot.val();
+            updateLobbyDisplay(players);
+            
+            if (gameState.currentScreen === 'round-screen') {
+                updatePlayersStatus(players);
+            } else if (gameState.currentScreen === 'waiting-screen') {
+                updateWaitingStatus(players);
+            }
+        }
+
+        // Отображение лобби
+        function showLobby() {
+            showScreen('lobby-screen');
+            document.getElementById('lobby-room-code').textContent = gameState.roomCode;
+            document.getElementById('room-code-display').textContent = gameState.roomCode;
+        }
+        
+        // Обновление отображения лобби
+        function updateLobbyDisplay(players) {
+            const playersArray = Object.values(players || {});
+            const playersList = document.getElementById('players-list');
+            const playerCount = document.getElementById('player-count');
+            const readyCount = document.getElementById('ready-count');
+            
+            // Обновляем счетчики
+            playerCount.textContent = playersArray.length;
+            readyCount.textContent = playersArray.filter(p => p.ready).length;
+            
+            // Отрисовываем список игроков
+            playersList.innerHTML = playersArray.map(player => {
+                const isCurrentPlayer = player.id === gameState.playerId;
+                const statusIcon = player.online ? '🟢' : '🔴';
+                const readyIcon = player.ready ? '✅' : '⏳';
+                const nameStyle = isCurrentPlayer ? 'font-weight: bold;' : '';
+                
+                return `
+                    <div class="player-status ${isCurrentPlayer ? 'current-player' : ''}">
+                        <span>${statusIcon} ${player.name} ${isCurrentPlayer ? '(вы)' : ''}</span>
+                        <div class="status-indicator">
+                            <span>${readyIcon}</span>
+                            <span>${player.ready ? 'Готов' : 'Ожидание'}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            // Проверяем, готовы ли все игроки к старту
+            if (playersArray.length === 4 && playersArray.every(p => p.ready) && gameState.isHost) {
+                setTimeout(() => startGameForAllPlayers(), 1000);
+            }
+        }
+        
+        // Копирование кода комнаты
+        function copyRoomCode() {
+            navigator.clipboard.writeText(gameState.roomCode).then(() => {
+                const element = document.getElementById('room-code-display');
+                const originalText = element.textContent;
+                element.textContent = 'Скопировано!';
+                setTimeout(() => {
+                    element.textContent = originalText;
+                }, 1500);
+            }).catch(() => {
+                alert(`Код комнаты: ${gameState.roomCode}`);
+            });
+        }
+        
+        // Переключение статуса готовности
+        function toggleReady() {
+            if (!gameState.roomCode || !gameState.playerId) return;
+            
+            const playerRef = database.ref(`rooms/${gameState.roomCode}/players/${gameState.playerId}/ready`);
+            
+            playerRef.once('value').then(snapshot => {
+                const currentReady = snapshot.val() || false;
+                playerRef.set(!currentReady);
+                
+                const btn = document.getElementById('ready-btn');
+                btn.textContent = !currentReady ? 'Отменить готовность' : 'Я готов!';
+            });
+        }
+        
+        // Покинуть комнату
+        function leaveRoom() {
+            if (gameState.roomRef) {
+                gameState.roomRef.off();
+            }
+            if (gameState.playersRef) {
+                gameState.playersRef.off();
+            }
+            
+            if (gameState.roomCode && gameState.playerId) {
+                database.ref(`rooms/${gameState.roomCode}/players/${gameState.playerId}`).remove();
+            }
+            
+            // Сбрасываем состояние
+            gameState.roomCode = '';
+            gameState.isHost = false;
+            gameState.roomRef = null;
+            gameState.playersRef = null;
+            
+            document.getElementById('player-name').value = '';
+            document.getElementById('room-code').value = '';
+            document.getElementById('join-room-section').style.display = 'none';
+            
+            showScreen('start-screen');
+        }
+
+        // Старт игры для всех игроков (только host)
+        function startGameForAllPlayers() {
+            if (!gameState.isHost) return;
+            
+            // Генерируем случайные издержки
+            const actualCost = gameState.possibleCosts[Math.floor(Math.random() * gameState.possibleCosts.length)];
+            
+            const updates = {
+                status: 'playing',
+                actualCost: actualCost,
+                roundStartTime: Date.now()
+            };
+            
+            // Сбрасываем ready у всех игроков
+            database.ref(`rooms/${gameState.roomCode}/players`).once('value').then(snapshot => {
+                const players = snapshot.val();
+                Object.keys(players).forEach(playerId => {
+                    updates[`players/${playerId}/ready`] = false;
+                    updates[`players/${playerId}/belief`] = 0;
+                    updates[`players/${playerId}/contribution`] = 0;
+                });
+                
+                database.ref(`rooms/${gameState.roomCode}`).update(updates);
+            });
+        }
+        
+        // Начало раунда для игрока
+        function startGameRound(roomData) {
+            showScreen('round-screen');
+            updateRoundDisplay();
+            renderExpectationOptions();
+            updateHistory();
+            updatePlayersStatus(roomData.players);
+            updateScoresDisplay(roomData.players);
+            document.getElementById('contribution-section').style.display = 'none';
+        }
+
+        // Обновление отображения раунда
+        function updateRoundDisplay() {
+            document.getElementById('round-title').textContent = `Раунд ${gameState.currentRound} из 5`;
+            document.getElementById('progress-fill').style.width = `${(gameState.currentRound - 1) / 5 * 100}%`;
+            
+            if (gameState.currentRound > 1) {
+                document.getElementById('history-section').style.display = 'block';
+            }
+        }
+        
+        // Обновление статуса игроков
+        function updatePlayersStatus(players) {
+            const playersArray = Object.values(players || {});
+            const statusContainer = document.getElementById('players-status');
+            
+            statusContainer.innerHTML = playersArray.map(player => {
+                const isCurrentPlayer = player.id === gameState.playerId;
+                let statusText = '💭 Думает...';
+                let statusColor = 'var(--color-text-secondary)';
+                
+                if (player.ready) {
+                    statusText = '✅ Готов!';
+                    statusColor = 'var(--color-success)';
+                }
+                
+                if (!player.online) {
+                    statusText = '🔴 Офлайн';
+                    statusColor = 'var(--color-error)';
+                }
+                
+                return `
+                    <div style="display: flex; justify-content: space-between; padding: 4px 0; ${isCurrentPlayer ? 'font-weight: bold;' : ''}">
+                        <span>${player.name} ${isCurrentPlayer ? '(вы)' : ''}</span>
+                        <span style="color: ${statusColor};">${statusText}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Обновление отображения очков
+        function updateScoresDisplay(players) {
+            const playersArray = Object.values(players || {});
+            const scoresContainer = document.getElementById('scores-display');
+            
+            scoresContainer.innerHTML = playersArray.map(player => {
+                const isCurrentPlayer = player.id === gameState.playerId;
+                return `
+                    <div style="display: flex; justify-content: space-between; padding: 4px 0; ${isCurrentPlayer ? 'font-weight: bold;' : ''}">
+                        <span>${player.name} ${isCurrentPlayer ? '(вы)' : ''}</span>
+                        <span>${player.score || 0} очков</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Отрисовка вариантов прогноза
+        function renderExpectationOptions() {
+            const container = document.getElementById('expectation-options');
+            container.innerHTML = '';
+            
+            gameState.possibleCosts.forEach(cost => {
+                const option = document.createElement('div');
+                option.className = 'radio-option';
+                option.onclick = () => selectExpectation(cost);
+                option.innerHTML = `
+                    <input type="radio" name="expectation" value="${cost}" style="margin-right: 8px;">
+                    <span>${cost} монет</span>
+                `;
+                container.appendChild(option);
             });
         }
 
-        // Расчет результатов раунда (любой игрок может запустить)
-        function calculateRoundResults() {
-            const roundResultsRef = database.ref(`rooms/${roomCode}/roundResults`);
+        // Выбор прогноза
+        function selectExpectation(cost) {
+            document.querySelectorAll('#expectation-options .radio-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+            event.currentTarget.querySelector('input').checked = true;
             
-            roundResultsRef.transaction(current => {
-                if (current) return; // Уже посчитано
+            document.getElementById('selected-expectation').textContent = cost;
+            document.getElementById('contribution-section').style.display = 'block';
+            document.getElementById('step1-error').style.display = 'none';
+        }
+
+        // Настройка слайдера
+        function setupSlider() {
+            const slider = document.getElementById('contribution-slider');
+            const display = document.getElementById('contribution-value');
+            
+            slider.oninput = function() {
+                display.textContent = `${this.value} монет`;
+            };
+        }
+
+        // Отправка решений раунда
+        function submitRound() {
+            const expectationInput = document.querySelector('input[name="expectation"]:checked');
+            const contributionSlider = document.getElementById('contribution-slider');
+            
+            if (!expectationInput) {
+                document.getElementById('step1-error').textContent = 'Пожалуйста, выберите ваш прогноз';
+                document.getElementById('step1-error').style.display = 'block';
+                return;
+            }
+            
+            const expectation = parseInt(expectationInput.value);
+            const contribution = parseInt(contributionSlider.value);
+            
+            console.log('DEBUG: Отправка решений -', { expectation, contribution });
+            
+            // Отправляем решения в Firebase
+            const playerUpdates = {
+                belief: expectation,
+                contribution: contribution,
+                ready: true,
+                timestamp: Date.now()
+            };
+            
+            database.ref(`rooms/${gameState.roomCode}/players/${gameState.playerId}`).update(playerUpdates)
+                .then(() => {
+                    console.log('DEBUG: Решения отправлены успешно');
+                    showScreen('waiting-screen');
+                    // ВСЕ игроки проверяют готовность
+                    checkIfAllReady();
+                })
+                .catch(error => {
+                    console.error('ERROR: Ошибка отправки решений:', error);
+                    showError('Ошибка отправки решений');
+                });
+        }
+        
+        // ВСЕ игроки проверяют, все ли готовы (КРИТИЧЕСКАЯ ФУНКЦИЯ)
+        function checkIfAllReady() {
+            database.ref(`rooms/${gameState.roomCode}/players`).once('value', (snapshot) => {
+                const players = snapshot.val();
+                if (!players) return;
+                
+                const playersArray = Object.values(players);
+                const playerCount = playersArray.length;
+                const readyCount = playersArray.filter(p => p.ready).length;
+                
+                console.log(`DEBUG: checkIfAllReady - ${readyCount}/${playerCount} игроков готовы`);
+                
+                if (readyCount === playerCount && playerCount > 0) {
+                    console.log('DEBUG: ВСЕ ГОТОВЫ! Начинаем расчет результатов...');
+                    // Пытаемся вычислить результаты (с использованием транзакции)
+                    calculateRoundResultsAtomic();
+                }
+            }).catch(error => {
+                console.error('ERROR: checkIfAllReady failed:', error);
+            });
+        }
+        
+        // Обновление статуса ожидания
+        function updateWaitingStatus(players) {
+            const playersArray = Object.values(players || {});
+            const readyCount = playersArray.filter(p => p.ready).length;
+            const totalCount = playersArray.length;
+            const waitingContainer = document.getElementById('waiting-status');
+            
+            console.log(`DEBUG: updateWaitingStatus - ${readyCount}/${totalCount} готовы`);
+            
+            waitingContainer.innerHTML = `
+                <div class="loading" style="margin: 0 auto 16px;"></div>
+                <p class="mb-16"><strong>Готово: ${readyCount}/${totalCount} игроков</strong></p>
+                ${playersArray.map(player => {
+                    const icon = player.ready ? '✅' : '⏳';
+                    const status = player.ready ? 'Готов' : 'Думает...';
+                    return `<p>${icon} ${player.name}: ${status}</p>`;
+                }).join('')}
+            `;
+            
+            // ВСЕ игроки проверяют готовность
+            if (readyCount === totalCount && totalCount > 0) {
+                console.log('DEBUG: Все готовы в updateWaitingStatus, вызываем checkIfAllReady');
+                checkIfAllReady();
+            }
+        }
+
+        // Атомарный расчет результатов раунда (может вызвать ЛЮБОЙ игрок)
+        function calculateRoundResultsAtomic() {
+            const roundRef = database.ref(`rooms/${gameState.roomCode}`);
+            const calculatedRef = database.ref(`rooms/${gameState.roomCode}/roundCalculated`);
+            
+            console.log('DEBUG: calculateRoundResultsAtomic - попытка расчета результатов');
+            
+            // Используем транзакцию для атомарности
+            calculatedRef.transaction((current) => {
+                if (current === true) {
+                    console.log('DEBUG: Результаты уже рассчитаны другим игроком');
+                    return; // Прерываем транзакцию
+                }
+                console.log('DEBUG: Устанавливаем флаг roundCalculated = true');
                 return true;
             }, (error, committed, snapshot) => {
-                if (committed && snapshot.val() === true) {
-                    console.log('Calculating results...');
-                    
-                    currentRoomRef.once('value', snap => {
-                        const roomData = snap.val();
-                        const players = roomData.players;
-                        const currentRound = roomData.currentRound;
-
-                        // Случайная стоимость
-                        const actualCost = GAME_PARAMS.possibleCosts[
-                            Math.floor(Math.random() * GAME_PARAMS.possibleCosts.length)
-                        ];
-
-                        // Суммируем взносы
-                        let totalContributions = 0;
-                        const contributions = {};
-                        Object.entries(players).forEach(([pid, p]) => {
-                            contributions[pid] = p.contribution || 0;
-                            totalContributions += contributions[pid];
-                        });
-
-                        const success = totalContributions >= actualCost;
-
-                        // Выигрыши
-                        const updates = {};
-                        Object.entries(players).forEach(([pid, p]) => {
-                            const payoff = success ? (GAME_PARAMS.individualBenefit - contributions[pid]) : -contributions[pid];
-                            const newScore = (p.score || 0) + payoff;
-                            updates[`players/${pid}/score`] = newScore;
-                            updates[`players/${pid}/roundPayoff`] = payoff;
-                        });
-
-                        // Сохраняем результаты
-                        updates[`history/round${currentRound}`] = {
-                            actualCost,
-                            totalContributions,
-                            success,
-                            contributions,
-                            timestamp: Date.now()
-                        };
-
-                        updates['actualCost'] = actualCost;
-                        updates['totalContributions'] = totalContributions;
-                        updates['success'] = success;
-
-                        database.ref(`rooms/${roomCode}`).update(updates).then(() => {
-                            console.log('Results saved!');
-                        });
-                    });
-                }
-            });
-        }
-
-        // ЭКРАН 6: Результаты раунда
-        function showRoundResults(roomData) {
-            const players = roomData.players || {};
-            const currentRound = roomData.currentRound;
-            const actualCost = roomData.actualCost;
-            const totalContributions = roomData.totalContributions;
-            const success = roomData.success;
-
-            const container = document.getElementById('gameContainer');
-            container.innerHTML = `
-                <h2 class="text-center mb-4">Результаты раунда ${currentRound}</h2>
-                
-                <div class="text-center mb-4">
-                    <span class="${success ? 'success-badge' : 'fail-badge'}">
-                        ${success ? '✅ Проект создан!' : '❌ Проект провален'}
-                    </span>
-                </div>
-
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-body text-center">
-                                <h6 class="text-muted">Реальные издержки</h6>
-                                <h3>${actualCost} монет</h3>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-body text-center">
-                                <h6 class="text-muted">Сумма взносов группы</h6>
-                                <h3>${totalContributions} монет</h3>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="table-responsive">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Игрок</th>
-                                <th>Прогноз</th>
-                                <th>Взнос</th>
-                                <th>Выигрыш</th>
-                                <th>Всего</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${Object.entries(players).map(([pid, p]) => `
-                                <tr ${pid === playerId ? 'class="table-primary"' : ''}>
-                                    <td>${p.name} ${pid === playerId ? '(Вы)' : ''}</td>
-                                    <td>${p.belief || '-'}</td>
-                                    <td>${p.contribution || 0}</td>
-                                    <td>${p.roundPayoff >= 0 ? '+' : ''}${p.roundPayoff}</td>
-                                    <td><strong>${p.score}</strong></td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="alert alert-${players[playerId].roundPayoff >= 0 ? 'success' : 'danger'}">
-                    <strong>Ваш выигрыш в раунде:</strong> ${players[playerId].roundPayoff} монет<br>
-                    <strong>Накопленный выигрыш:</strong> ${players[playerId].score} монет
-                </div>
-
-                <button class="btn btn-primary btn-lg w-100" onclick="nextRound()">
-                    ${currentRound < GAME_PARAMS.numRounds ? 'Следующий раунд' : 'Финальные результаты'}
-                </button>
-            `;
-        }
-
-        function nextRound() {
-            currentRoomRef.once('value', snapshot => {
-                const roomData = snapshot.val();
-                const currentRound = roomData.currentRound;
-
-                if (currentRound >= GAME_PARAMS.numRounds) {
-                    // Игра окончена
-                    database.ref(`rooms/${roomCode}`).update({
-                        status: 'finished'
-                    });
+                if (error) {
+                    console.error('ERROR: Transaction failed:', error);
                     return;
                 }
-
-                // Следующий раунд
-                const updates = {
-                    currentRound: currentRound + 1,
-                    roundResults: null,
-                    actualCost: null,
-                    totalContributions: null,
-                    success: null
-                };
-
-                // Сбрасываем готовность и данные раунда
-                Object.keys(roomData.players).forEach(pid => {
-                    updates[`players/${pid}/ready`] = false;
-                    updates[`players/${pid}/belief`] = null;
-                    updates[`players/${pid}/contribution`] = null;
-                    updates[`players/${pid}/roundPayoff`] = null;
-                });
-
-                database.ref(`rooms/${roomCode}`).update(updates);
+                
+                if (!committed) {
+                    console.log('DEBUG: Transaction not committed (race condition)');
+                    return;
+                }
+                
+                if (snapshot.val() === true) {
+                    console.log('DEBUG: МЫ ПЕРВЫЕ! Начинаем расчет результатов...');
+                    
+                    // Получаем все данные комнаты
+                    roundRef.once('value').then(roomSnapshot => {
+                        const roomData = roomSnapshot.val();
+                        if (!roomData) {
+                            console.error('ERROR: Нет данных комнаты');
+                            return;
+                        }
+                        
+                        const players = roomData.players;
+                        const actualCost = roomData.actualCost;
+                        const currentRound = roomData.currentRound;
+                        
+                        console.log('DEBUG: Данные для расчета -', { actualCost, currentRound, playersCount: Object.keys(players).length });
+                        
+                        const playersArray = Object.values(players);
+                        
+                        // Считаем общие взносы
+                        const totalContribution = playersArray.reduce((sum, player) => sum + (player.contribution || 0), 0);
+                        const projectSuccess = totalContribution >= actualCost;
+                        
+                        console.log('DEBUG: Расчет -', { totalContribution, actualCost, projectSuccess });
+                        
+                        // Рассчитываем выигрыши
+                        const roundResults = {};
+                        const contributions = {};
+                        const payoffs = {};
+                        
+                        playersArray.forEach(player => {
+                            const payoff = projectSuccess ? (50 - player.contribution) : (-player.contribution);
+                            
+                            roundResults[player.id] = {
+                                expectation: player.belief,
+                                contribution: player.contribution,
+                                payoff: payoff
+                            };
+                            
+                            contributions[player.id] = player.contribution;
+                            payoffs[player.id] = payoff;
+                        });
+                        
+                        // Сохраняем результаты в историю
+                        const historyData = {
+                            actualCost: actualCost,
+                            totalContributions: totalContribution,
+                            success: projectSuccess,
+                            contributions: contributions,
+                            results: roundResults,
+                            timestamp: Date.now()
+                        };
+                        
+                        // Формируем обновления
+                        const updates = {};
+                        updates[`history/round${currentRound}`] = historyData;
+                        updates['status'] = 'results';
+                        
+                        // Обновляем счета игроков
+                        playersArray.forEach(player => {
+                            const newScore = (player.score || 0) + payoffs[player.id];
+                            updates[`players/${player.id}/score`] = newScore;
+                            updates[`players/${player.id}/ready`] = false;
+                        });
+                        
+                        console.log('DEBUG: Применяем обновления к базе данных...');
+                        
+                        // Применяем все обновления
+                        roundRef.update(updates)
+                            .then(() => {
+                                console.log('DEBUG: ✅ Результаты успешно сохранены!');
+                                // Сбрасываем флаг для следующего раунда
+                                setTimeout(() => {
+                                    calculatedRef.set(false);
+                                    console.log('DEBUG: Флаг roundCalculated сброшен');
+                                }, 500);
+                            })
+                            .catch(error => {
+                                console.error('ERROR: Ошибка при сохранении результатов:', error);
+                                calculatedRef.set(false); // Сбрасываем флаг при ошибке
+                            });
+                    }).catch(error => {
+                        console.error('ERROR: Ошибка получения данных комнаты:', error);
+                        calculatedRef.set(false);
+                    });
+                }
             });
         }
 
-        // ЭКРАН 7: Финальные результаты
+        // Показ результатов раунда
+        function showRoundResults(roomData) {
+            showScreen('results-screen');
+            
+            const currentRoundHistory = roomData.history[`round${gameState.currentRound}`];
+            if (!currentRoundHistory) return;
+            
+            document.getElementById('results-title').textContent = `Результаты раунда ${gameState.currentRound}`;
+            
+            // Таблица результатов группы
+            const playersArray = Object.values(roomData.players || {});
+            const table = document.getElementById('round-results-table');
+            table.innerHTML = '';
+            
+            playersArray.forEach(player => {
+                const result = currentRoundHistory.results[player.id];
+                if (result) {
+                    const row = table.insertRow();
+                    row.innerHTML = `
+                        <td><strong>${player.name}</strong></td>
+                        <td>${result.expectation}</td>
+                        <td>${result.contribution}</td>
+                    `;
+                }
+            });
+            
+            // Добавляем строку с итогами
+            const summaryRow = table.insertRow();
+            summaryRow.style.borderTop = '2px solid var(--color-border)';
+            summaryRow.innerHTML = `
+                <td><strong>Сумма группы</strong></td>
+                <td>-</td>
+                <td><strong>${currentRoundHistory.totalContributions}</strong></td>
+            `;
+            
+            const costRow = table.insertRow();
+            costRow.innerHTML = `
+                <td><strong>Реальные издержки</strong></td>
+                <td>-</td>
+                <td><strong>${currentRoundHistory.actualCost}</strong></td>
+            `;
+            
+            // Статус проекта
+            const statusElement = document.getElementById('project-status');
+            if (currentRoundHistory.success) {
+                statusElement.innerHTML = '<span class="status status--success">СОЗДАН</span>';
+            } else {
+                statusElement.innerHTML = '<span class="status status--error">ПРОВАЛЕН</span>';
+            }
+            
+            // Ваши результаты
+            const myResult = currentRoundHistory.results[gameState.playerId];
+            if (myResult) {
+                document.getElementById('round-payoff').textContent = myResult.payoff > 0 ? `+${myResult.payoff}` : myResult.payoff;
+            }
+            
+            const myPlayer = playersArray.find(p => p.id === gameState.playerId);
+            if (myPlayer) {
+                document.getElementById('total-payoff').textContent = myPlayer.score || 0;
+            }
+            
+            // Кнопка следующего раунда (ЛЮБОЙ может нажать)
+            const nextBtn = document.getElementById('next-round-btn');
+            if (gameState.currentRound >= 5) {
+                nextBtn.textContent = 'Финальные результаты';
+                nextBtn.onclick = () => {
+                    console.log('DEBUG: Переход к финальным результатам');
+                    database.ref(`rooms/${gameState.roomCode}/status`).set('finished');
+                };
+            } else {
+                nextBtn.textContent = 'Следующий раунд';
+                nextBtn.onclick = () => nextRound();
+            }
+        }
+
+        // Следующий раунд (ЛЮБОЙ игрок может инициировать)
+        function nextRound() {
+            console.log('DEBUG: nextRound вызван, isHost =', gameState.isHost);
+            
+            const nextRoundNumber = gameState.currentRound + 1;
+            
+            if (nextRoundNumber > 5) {
+                console.log('DEBUG: Все раунды завершены, переход к финалу');
+                database.ref(`rooms/${gameState.roomCode}/status`).set('finished');
+                return;
+            }
+            
+            // Используем транзакцию чтобы только один игрок начал следующий раунд
+            const roundRef = database.ref(`rooms/${gameState.roomCode}/currentRound`);
+            roundRef.transaction((current) => {
+                if (current !== gameState.currentRound) {
+                    console.log('DEBUG: Раунд уже изменен другим игроком');
+                    return; // Прерываем
+                }
+                console.log('DEBUG: Переход к раунду', nextRoundNumber);
+                return nextRoundNumber;
+            }, (error, committed, snapshot) => {
+                if (error) {
+                    console.error('ERROR: Transaction failed:', error);
+                    return;
+                }
+                
+                if (committed && snapshot.val() === nextRoundNumber) {
+                    console.log('DEBUG: Мы инициировали следующий раунд');
+                    
+                    // Генерируем новые случайные издержки
+                    const actualCost = gameState.possibleCosts[Math.floor(Math.random() * gameState.possibleCosts.length)];
+                    
+                    const updates = {
+                        actualCost: actualCost,
+                        status: 'playing',
+                        roundStartTime: Date.now(),
+                        roundCalculated: false
+                    };
+                    
+                    // Сбрасываем ready, belief, contribution у всех игроков
+                    database.ref(`rooms/${gameState.roomCode}/players`).once('value').then(snapshot => {
+                        const players = snapshot.val();
+                        Object.keys(players).forEach(playerId => {
+                            updates[`players/${playerId}/ready`] = false;
+                            updates[`players/${playerId}/belief`] = 0;
+                            updates[`players/${playerId}/contribution`] = 0;
+                        });
+                        
+                        console.log('DEBUG: Применяем обновления для следующего раунда');
+                        database.ref(`rooms/${gameState.roomCode}`).update(updates);
+                    });
+                }
+            });
+        }
+
+        // Обновление истории игры
+        function updateHistory() {
+            if (gameState.currentRound <= 1) return;
+            
+            database.ref(`rooms/${gameState.roomCode}/history`).once('value').then(snapshot => {
+                const history = snapshot.val() || {};
+                const table = document.getElementById('history-table');
+                table.innerHTML = '';
+                
+                for (let round = 1; round < gameState.currentRound; round++) {
+                    const roundData = history[`round${round}`];
+                    if (roundData && roundData.results && roundData.results[gameState.playerId]) {
+                        const myResult = roundData.results[gameState.playerId];
+                        const row = table.insertRow();
+                        row.innerHTML = `
+                            <td>${round}</td>
+                            <td>${myResult.expectation}</td>
+                            <td>${myResult.contribution}</td>
+                            <td>${roundData.actualCost}</td>
+                            <td>${roundData.success ? '<span class="status status--success">Создан</span>' : '<span class="status status--error">Провален</span>'}</td>
+                            <td>${myResult.payoff > 0 ? '+' : ''}${myResult.payoff}</td>
+                        `;
+                    }
+                }
+            });
+        }
+
+
+
+
+
+        // Финальные результаты
         function showFinalResults(roomData) {
-            const players = roomData.players || {};
+            showScreen('final-screen');
+            
+            const playersArray = Object.values(roomData.players || {});
+            const myPlayer = playersArray.find(p => p.id === gameState.playerId);
             const history = roomData.history || {};
-            const sortedPlayers = Object.entries(players).sort((a, b) => b[1].score - a[1].score);
-            const successCount = Object.values(history).filter(h => h.success).length;
-
-            const container = document.getElementById('gameContainer');
-            container.innerHTML = `
-                <h1 class="text-center mb-4">🎉 Игра завершена!</h1>
-
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h4 class="text-center">Итоговая таблица</h4>
-                        <table class="table table-striped">
+            
+            // Мои результаты
+            if (myPlayer) {
+                const totalPayoff = myPlayer.score || 0;
+                const averagePayoff = (totalPayoff / 5).toFixed(1);
+                const successfulProjects = Object.values(history).filter(round => round.success).length;
+                
+                document.getElementById('final-total-payoff').textContent = totalPayoff;
+                document.getElementById('average-payoff').textContent = averagePayoff;
+                document.getElementById('successful-projects').textContent = successfulProjects;
+            }
+            
+            // Сортируем игроков по очкам и создаем таблицу лидеров
+            const sortedPlayers = playersArray.sort((a, b) => (b.score || 0) - (a.score || 0));
+            
+            // Добавляем таблицу лидеров перед моими результатами
+            const leaderboardCard = document.querySelector('#final-screen .card');
+            const existingLeaderboard = document.getElementById('leaderboard-table');
+            if (!existingLeaderboard) {
+                const leaderboardHtml = `
+                    <div>
+                        <h3>🏆 Таблица лидеров</h3>
+                        <table class="table" id="leaderboard-table">
                             <thead>
                                 <tr>
                                     <th>Место</th>
-                                    <th>Игрок</th>
-                                    <th>Итоговый счет</th>
+                                    <th>Имя</th>
+                                    <th>Очки</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                ${sortedPlayers.map(([pid, p], index) => `
-                                    <tr ${pid === playerId ? 'class="table-primary"' : ''}>
-                                        <td><strong>${index + 1}</strong></td>
-                                        <td>${p.name} ${pid === playerId ? '(Вы)' : ''}</td>
-                                        <td><h5>${p.score} монет</h5></td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="row mb-4">
-                    <div class="col-md-4">
-                        <div class="card text-center">
-                            <div class="card-body">
-                                <h6 class="text-muted">Общий выигрыш</h6>
-                                <h3>${players[playerId].score} монет</h3>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card text-center">
-                            <div class="card-body">
-                                <h6 class="text-muted">Средний выигрыш за раунд</h6>
-                                <h3>${(players[playerId].score / GAME_PARAMS.numRounds).toFixed(1)} монет</h3>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card text-center">
-                            <div class="card-body">
-                                <h6 class="text-muted">Успешных проектов</h6>
-                                <h3>${successCount} из ${GAME_PARAMS.numRounds}</h3>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h5>История раундов</h5>
-                        <table class="table table-sm">
-                            <thead>
-                                <tr>
-                                    <th>Раунд</th>
-                                    <th>Прогноз</th>
-                                    <th>Взнос</th>
-                                    <th>Реальные издержки</th>
-                                    <th>Сумма группы</th>
-                                    <th>Статус</th>
-                                    <th>Выигрыш</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${Object.entries(history).map(([round, data]) => {
-                                    const roundNum = parseInt(round.replace('round', ''));
-                                    const myContribution = data.contributions[playerId] || 0;
-                                    const myPayoff = data.success ? (50 - myContribution) : -myContribution;
+                                ${sortedPlayers.map((player, index) => {
+                                    const isCurrentPlayer = player.id === gameState.playerId;
+                                    const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
                                     return `
-                                        <tr>
-                                            <td>${roundNum}</td>
-                                            <td>-</td>
-                                            <td>${myContribution}</td>
-                                            <td>${data.actualCost}</td>
-                                            <td>${data.totalContributions}</td>
-                                            <td>${data.success ? '✅' : '❌'}</td>
-                                            <td>${myPayoff >= 0 ? '+' : ''}${myPayoff}</td>
+                                        <tr style="${isCurrentPlayer ? 'font-weight: bold; background-color: var(--color-bg-3);' : ''}">
+                                            <td>${medal}</td>
+                                            <td>${player.name} ${isCurrentPlayer ? '(вы)' : ''}</td>
+                                            <td>${player.score || 0}</td>
                                         </tr>
                                     `;
                                 }).join('')}
                             </tbody>
                         </table>
                     </div>
-                </div>
-
-                <div class="d-grid gap-2">
-                    <button class="btn btn-primary btn-lg" onclick="downloadCSV()">Скачать результаты (CSV)</button>
-                    <button class="btn btn-outline-secondary" onclick="playAgain()">Играть снова</button>
-                </div>
-            `;
+                `;
+                const gridDiv = leaderboardCard.querySelector('.grid');
+                if (gridDiv) {
+                    gridDiv.innerHTML = leaderboardHtml + gridDiv.innerHTML;
+                }
+            }
+            
+            // Детальная статистика (только мои результаты)
+            const table = document.getElementById('final-results-table');
+            table.innerHTML = '';
+            
+            for (let round = 1; round <= 5; round++) {
+                const roundData = history[`round${round}`];
+                if (roundData && roundData.results && roundData.results[gameState.playerId]) {
+                    const myResult = roundData.results[gameState.playerId];
+                    const row = table.insertRow();
+                    row.innerHTML = `
+                        <td>${round}</td>
+                        <td>${myResult.expectation}</td>
+                        <td>${myResult.contribution}</td>
+                        <td>${roundData.actualCost}</td>
+                        <td>${roundData.totalContributions}</td>
+                        <td>${roundData.success ? '<span class="status status--success">Создан</span>' : '<span class="status status--error">Провален</span>'}</td>
+                        <td>${myResult.payoff > 0 ? '+' : ''}${myResult.payoff}</td>
+                    `;
+                }
+            }
+            
+            // Сохраняем данные для CSV
+            gameState.finalRoomData = roomData;
+            
+            // График
+            createPayoffChart();
         }
 
-        function downloadCSV() {
-            currentRoomRef.once('value', snapshot => {
-                const roomData = snapshot.val();
-                const players = roomData.players;
-                const history = roomData.history || {};
-
-                let csv = 'RoomCode,PlayerId,PlayerName,Round,Belief,Contribution,ActualCost,TotalContributions,Success,RoundPayoff,TotalScore\n';
-
-                Object.entries(history).forEach(([roundKey, data]) => {
-                    const roundNum = parseInt(roundKey.replace('round', ''));
-                    Object.entries(players).forEach(([pid, p]) => {
-                        const contrib = data.contributions[pid] || 0;
-                        const payoff = data.success ? (50 - contrib) : -contrib;
-                        csv += `${roomCode},${pid},${p.name},${roundNum},-,${contrib},${data.actualCost},${data.totalContributions},${data.success},${payoff},${p.score}\n`;
-                    });
-                });
-
-                const blob = new Blob([csv], { type: 'text/csv' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `results_${roomCode}_${Date.now()}.csv`;
-                a.click();
+        // Создание графика
+        function createPayoffChart() {
+            const ctx = document.getElementById('payoff-chart').getContext('2d');
+            
+            if (!gameState.finalRoomData || !gameState.finalRoomData.history) {
+                return;
+            }
+            
+            const history = gameState.finalRoomData.history;
+            const cumulativePayoffs = [];
+            let cumulative = 0;
+            
+            for (let round = 1; round <= 5; round++) {
+                const roundData = history[`round${round}`];
+                if (roundData && roundData.results && roundData.results[gameState.playerId]) {
+                    const payoff = roundData.results[gameState.playerId].payoff;
+                    cumulative += payoff;
+                }
+                cumulativePayoffs.push(cumulative);
+            }
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Раунд 1', 'Раунд 2', 'Раунд 3', 'Раунд 4', 'Раунд 5'],
+                    datasets: [{
+                        label: 'Накопленный выигрыш',
+                        data: cumulativePayoffs,
+                        borderColor: '#1FB8CD',
+                        backgroundColor: 'rgba(31, 184, 205, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: 'Монеты'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
             });
         }
 
-        function playAgain() {
-            if (currentRoomRef) {
-                currentRoomRef.off();
+        // Скачивание CSV
+        function downloadResults() {
+            if (!gameState.finalRoomData) {
+                alert('Нет данных для экспорта');
+                return;
             }
-            showHomeScreen();
+            
+            const headers = ['Room_Code', 'Player_ID', 'Player_Name', 'Round', 'Belief', 'Contribution', 'Actual_Cost', 'Total_Contributions', 'Project_Success', 'Payoff', 'Total_Score'];
+            const rows = [headers];
+            
+            const playersArray = Object.values(gameState.finalRoomData.players || {});
+            const history = gameState.finalRoomData.history || {};
+            
+            // Добавляем данные всех игроков по всем раундам
+            playersArray.forEach(player => {
+                for (let round = 1; round <= 5; round++) {
+                    const roundData = history[`round${round}`];
+                    if (roundData && roundData.results && roundData.results[player.id]) {
+                        const result = roundData.results[player.id];
+                        rows.push([
+                            gameState.roomCode,
+                            player.id,
+                            player.name,
+                            round,
+                            result.expectation,
+                            result.contribution,
+                            roundData.actualCost,
+                            roundData.totalContributions,
+                            roundData.success ? 'Success' : 'Failure',
+                            result.payoff,
+                            player.score || 0
+                        ]);
+                    }
+                }
+            });
+            
+            const csvContent = '\uFEFF' + rows.map(row => row.join(',')).join('\n'); // Добавляем BOM для UTF-8
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            
+            const timestamp = new Date().toISOString().slice(0, 16).replace(/[T:]/g, '_');
+            link.href = URL.createObjectURL(blob);
+            link.download = `multiplayer_experiment_${gameState.roomCode}_${timestamp}.csv`;
+            link.click();
         }
 
-        // Инициализация
-        showHomeScreen();
+        // Перезапуск игры
+        function restartGame() {
+            // Очищаем слушатели
+            if (gameState.roomRef) {
+                gameState.roomRef.off();
+            }
+            if (gameState.playersRef) {
+                gameState.playersRef.off();
+            }
+            
+            // Сбрасываем состояние
+            gameState.playerId = generatePlayerId();
+            gameState.playerName = '';
+            gameState.roomCode = '';
+            gameState.isHost = false;
+            gameState.currentRound = 1;
+            gameState.roomRef = null;
+            gameState.playersRef = null;
+            gameState.gameHistory = [];
+            gameState.finalRoomData = null;
+            
+            // Очищаем формы
+            document.getElementById('player-name').value = '';
+            document.getElementById('room-code').value = '';
+            document.getElementById('join-room-section').style.display = 'none';
+            
+            showScreen('start-screen');
+        }
+
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', initGame);
+        
+        // Отслеживание закрытия страницы/вкладки
+        window.addEventListener('beforeunload', () => {
+            if (gameState.roomCode && gameState.playerId) {
+                // Отмечаем игрока как офлайн
+                database.ref(`rooms/${gameState.roomCode}/players/${gameState.playerId}/online`).set(false);
+            }
+        });
+        
+        // Обработка отключения от сети
+        window.addEventListener('online', () => {
+            if (gameState.roomCode && gameState.playerId) {
+                database.ref(`rooms/${gameState.roomCode}/players/${gameState.playerId}/online`).set(true);
+            }
+        });
+        
+        window.addEventListener('offline', () => {
+            if (gameState.roomCode && gameState.playerId) {
+                database.ref(`rooms/${gameState.roomCode}/players/${gameState.playerId}/online`).set(false);
+            }
+        });
     </script>
 </body>
 </html>
